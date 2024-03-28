@@ -1,6 +1,6 @@
 # Dawnline
 
-![Dawnline Logo](public/images/logo.png)
+![Dawnline Logo](logo.png)
 
 (DAW + online = DAWnline)
 
