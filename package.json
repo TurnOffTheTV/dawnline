@@ -1,0 +1,22 @@
+{
+  "name": "dawnline",
+  "version": "1.0.0",
+  "description": "Online DAW",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TurnOffTheTV/dawnline.git"
+  },
+  "author": "TurnOffTheTV",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/TurnOffTheTV/dawnline/issues"
+  },
+  "homepage": "https://github.com/TurnOffTheTV/dawnline#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

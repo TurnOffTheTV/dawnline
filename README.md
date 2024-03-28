@@ -1,5 +1,7 @@
 # Dawnline
 
+![Dawnline Logo](public/images/logo.png)
+
 (DAW + online = DAWnline)
 
 An advanced web app for working with audio. Currently a work in progress.
