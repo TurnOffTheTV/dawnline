@@ -7,6 +7,7 @@
 An advanced web app for working with audio. Currently a work in progress.
 
 With it, you ~~can~~ will be able to
+
 - Make and mix music, with WebMIDI support
 - Create patches with a software synthesizer
 - Edit audio files, with tools to trim, splice and add effects
