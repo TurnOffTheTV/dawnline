@@ -5,7 +5,7 @@
     </head>
     <body>
         <div class="menubar">
-            <div class="menubar-item" id="dawnline-logo">
+            <div class="menubar-item" id="button-logo">
                 <img src="/images/logo.png" width="65">
             </div>
             <div class="menubar-item" id="button-file">
@@ -18,9 +18,16 @@
                 <p>View</p>
             </div>
         </div>
-        <div id="menu">
-
+        <div id="channel-deck"></div>
+        <div id="menu" style="display:none;"></div>
+        <div id="fade-background" style="display:none;"></div>
+        <div class="window" id="window-about" style="display:none;">
+            <h1>About Dawnline</h1>
+            <p>Dawnline was started by TurnOffTheTV, but these people have also contributed:</p>
+            <!--<ul></ul>-->
+            <a>Dawnline is open-source on <a href="https://github.com/TurnOffTheTV/dawnline">GitHub</a>!</p>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/webmidi@latest/dist/iife/webmidi.iife.js"></script>
         <script src="/js/editor.js"></script>
     </body>
 </html>

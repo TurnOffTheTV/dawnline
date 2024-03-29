@@ -8,25 +8,75 @@
 
     /* basic colors */
     --color-background: white;
-    --color-background-secondary: gray;
+    --color-background-secondary: rgb(225,225,225);
+    --color-background-tertiary: rgb(200,200,200);
     --color-text: black;
 
     /* colors for dark mode */
     @media (prefers-color-scheme: dark) {
         --color-background: rgb(50,50,50);
-        --color-background-secondary: dimgrey;
+        --color-background-secondary: rgb(75,75,75);
+        --color-background-tertiary: rgb(100,100,100);
         --color-text: white;
     }
 }
 
+#fade-background {
+    /* the all-important faded background of the fade background */
+    background-color: rgba(255,255,255,0.75);
+
+    @media (prefers-color-scheme: dark) {
+        background-color: rgba(0,0,0,0.75);
+    }
+
+    /* position and size */
+    position: fixed;
+    left:0px;
+    top:0px;
+    width:100%;
+    height:100%;
+}
+
 #menu {
+    /* position and size */
     width: 300px;
     position: absolute;
+
+    /* displaying */
     background-color: var(--color-background-secondary);
+    flex-direction: column;
+}
+
+#channel-deck {
+    display: flex;
+    flex-direction: column;
 }
 
 .menu-item {
-    width: 300px;
+    /* size */
+    width: 100%;
+    height: 50px;
+
+    /* display */
+    display: flex;
+    flex-direction: row;
+
+    /* border */
+    border: solid 1px var(--color-gray);
+
+    /* more sizing stuff */
+    padding: 5px;
+
+    /* color */
+    background-color: var(--color-background-secondary);
+
+    /* cursor */
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    /* hover color */
+    background-color: var(--color-orange);
 }
 
 .menubar {
@@ -72,11 +122,35 @@
 }
 
 .menubar-item:hover {
-    background-color: var(--color-gray);
+    /* hover color */
+    background-color: var(--color-orange);
+}
+
+.window {
+    /* color */
+    background-color: var(--color-background-secondary);
+
+    /* position */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* more sizing stuff */
+    padding: 5px;
+
+    /* border color */
+    border: solid 1px var(--color-gray);
+}
+
+.channel {
+    height: 200px;
+    width: 100%;
+    border: solid 1px var(--color-gray)
 }
 
 body {
-    /*color*/
+    /* color */
     background-color: var(--color-background);
     color: var(--color-text);
 
