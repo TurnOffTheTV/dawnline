@@ -7,91 +7,28 @@ const button = {
     logo:document.getElementById("button-logo"),
     file:document.getElementById("button-file"),
     edit:document.getElementById("button-edit"),
-    view:document.getElementById("button-view")
+    view:document.getElementById("button-view"),
+    rename:document.getElementById("button-rename")
 };
 const fadeBackground = document.getElementById("fade-background");
 const menu = document.getElementById("menu");
 const channelDeck = document.getElementById("channel-deck");
-const aboutWindow = document.getElementById("window-about")
+const aboutWindow = document.getElementById("window-about");
+const renameWindow = document.getElementById("window-rename");
 
 //get Web Audio context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioContext = new AudioContext();
 const analyser = audioContext.createAnalyser();
 
-//menu data for the logo menu
-const logoMenu = [
-    {
-        label: "About Dawnline",
-        click: function(){
-            fadeBackground.style.display="block";
-            aboutWindow.style.display="block";
-        }
-    },
-    {
-        label: "Select Audio Output Device",
-        click: function(){
-            navigator.mediaDevices.selectAudioOutput().then(function(d){
-                console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
-            })
-        },
-        show: function(){
-            return navigator.mediaDevices.selectAudioOutput!==undefined;
-        }
-    }
-];
-
-//menu data for the File menu
-const fileMenu = [
-    {
-        label: "New",
-        image:"plus",
-        click: function(){
-            alert("Creating new file")
-        }
-    },
-    {
-        label: "Open",
-        click: function(){
-            alert("Opening old file")
-        }
-    },
-    {
-        label: "Save",
-        click: function(){
-            alert("Saving file")
-        }
-    },
-    {
-        label: "New Channel",
-        click: function(){
-            channels.push(new Channel());
-        }
-    },
-];
-
-//menu data for the Edit menu
-const editMenu = [
-    {
-        label: "Cut",
-        click: function(){
-            alert("Cut")
-        }
-    }
-];
-
-//menu data for the View menu
-const viewMenu = [
-    {
-        label: "KEYboard",
-        click: function(){
-            alert("KEYboard")
-        }
-    }
-];
-
+//variables for project content
+var projectInfo = {
+    name: "New Project"
+}
 //list of channels
 var channels = [];
+//list of patches
+var patches = [];
 
 //channel class for above array
 class Channel {
@@ -107,10 +44,124 @@ class Channel {
     drawWave(){}
 }
 
+//patch class for above array
+class Patch {
+    constructor(){
+        
+    }
+
+    drawWave(){}
+}
+
+//make rename button rename project
+button.rename.addEventListener("click",function(){
+    projectInfo.name=document.getElementById("input-rename").value;
+    document.getElementsByTagName("title")[0].innerText=projectInfo.name+" - Dawnline";
+    fadeBackground.click();
+});
+
+//menu data for the logo menu
+const logoMenu = [
+    {
+        label: "About Dawnline",
+        image: "info",
+        click: function(){
+            fadeBackground.style.display="block";
+            aboutWindow.style.display="block";
+        }
+    },
+    {
+        label: "Select Audio Output Device",
+        image: "speaker",
+        click: function(){
+            navigator.mediaDevices.selectAudioOutput().then(function(d){
+                console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
+            })
+        },
+        show: function(){
+            return navigator.mediaDevices.selectAudioOutput!==undefined;
+        }
+    }
+];
+
+//menu data for the File menu
+const fileMenu = [
+    {
+        label: "New",
+        image: "plus",
+        click: function(){
+            alert("Creating new file")
+        }
+    },
+    {
+        label: "Open",
+        image: "arrow-up",
+        click: function(){
+            alert("Opening old file")
+        }
+    },
+    {
+        label: "Save",
+        image: "arrow-down",
+        click: function(){
+            alert("Saving file")
+        }
+    },
+    {
+        label: "Rename",
+        image: "pencil",
+        click: function(){
+            fadeBackground.style.display="block";
+            renameWindow.style.display="block";
+        }
+    }
+];
+
+//menu data for the Edit menu
+const editMenu = [
+    {
+        label: "Cut",
+        click: function(){
+            alert("Cut")
+        }
+    },
+    {
+        label: "Copy",
+        click: function(){
+            alert("Copy")
+        }
+    },
+    {
+        label: "Paste",
+        click: function(){
+            alert("Paste")
+        }
+    },
+    {
+        label: "New Channel",
+        image: "plus",
+        click: function(){
+            channels.push(new Channel());
+        }
+    },
+];
+
+//menu data for the View menu
+const viewMenu = [
+    {
+        label: "KEYboard",
+        image: "midi",
+        click: function(){
+            alert("KEYboard")
+        }
+    }
+];
+
 //close windows
 fadeBackground.addEventListener("click",function(e){
     fadeBackground.style.display="none";
     aboutWindow.style.display="none";
+    renameWindow.style.display="none";
 })
 
 //change menu element for menubar
@@ -134,6 +185,7 @@ fadeBackground.addEventListener("click",function(e){
     });
     button.logo.addEventListener("click",function(e){
         menu.style.display="flex";
+        menu.focus();
         e.preventDefault();
     });
 
@@ -142,6 +194,7 @@ fadeBackground.addEventListener("click",function(e){
     });
     button.file.addEventListener("click",function(e){
         menu.style.display="flex";
+        menu.focus();
         e.preventDefault();
     });
 
@@ -150,6 +203,7 @@ fadeBackground.addEventListener("click",function(e){
     });
     button.edit.addEventListener("click",function(e){
         menu.style.display="flex";
+        menu.focus();
         e.preventDefault();
     });
 
@@ -158,6 +212,7 @@ fadeBackground.addEventListener("click",function(e){
     });
     button.view.addEventListener("click",function(e){
         menu.style.display="flex";
+        menu.focus();
         e.preventDefault();
     });
 }

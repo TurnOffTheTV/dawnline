@@ -128,7 +128,7 @@
 
 .window {
     /* color */
-    background-color: var(--color-background-secondary);
+    background-color: var(--color-background);
 
     /* position */
     position: fixed;
@@ -137,7 +137,8 @@
     transform: translate(-50%, -50%);
 
     /* more sizing stuff */
-    padding: 5px;
+    padding: 15px;
+    text-align: center;
 
     /* border color */
     border: solid 1px var(--color-gray);
@@ -147,6 +148,16 @@
     height: 200px;
     width: 100%;
     border: solid 1px var(--color-gray)
+}
+
+input {
+    /* color */
+    background-color: var(--color-background-secondary);
+    border: solid 1px var(--color-gray);
+
+    /* font */
+    font-family: "Fira Sans", sans-serif;
+    color: var(--color-text);
 }
 
 body {
