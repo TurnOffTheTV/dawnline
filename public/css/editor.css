@@ -21,6 +21,28 @@
     }
 }
 
+#menubar {
+    /* position and size */
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 75px;
+
+    /* more sizing stuff */
+    margin: 0px;
+    padding: 5px;
+
+    /* colors */
+    border-bottom: solid 1px var(--color-gray);
+    background-color: var(--color-background);
+
+    /* flexbox */
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+}
+
 #fade-background {
     /* the all-important faded background of the fade background */
     background-color: rgba(255,255,255,0.75);
@@ -48,8 +70,15 @@
 }
 
 #channel-deck {
+    position:absolute;
     display: flex;
     flex-direction: column;
+    top: 85px;
+    left:0px;
+    width:100%;
+    overflow-y: scroll;
+    margin: 0px;
+    padding: 0px;
 }
 
 .menu-item {
@@ -77,27 +106,6 @@
 .menu-item:hover {
     /* hover color */
     background-color: var(--color-orange);
-}
-
-.menubar {
-    /* position and size */
-    position: fixed;
-    left: 0px;
-    top: 0px;
-    width: 100%;
-    height: 75px;
-
-    /* more sizing stuff */
-    margin: 0px;
-    padding: 5px;
-
-    /* border */
-    border-bottom: solid 1px var(--color-gray);
-
-    /* flexbox */
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
 }
 
 .menubar-item {
@@ -145,9 +153,24 @@
 }
 
 .channel {
+    /* flexbox stuff */
+    display: flex;
+    flex-direction: row;
+
+    /* size */
     height: 200px;
     width: 100%;
-    border: solid 1px var(--color-gray)
+
+    /* borders */
+    border: solid 1px var(--color-gray);
+    border-top: none;
+}
+.channel-infobox {
+    height: 100%;
+    width: 100px;
+    border-right: solid 1px var(--color-gray);
+    background-color: var(--color-background-secondary);
+    padding-left: 10px;
 }
 
 input {
@@ -158,6 +181,15 @@ input {
     /* font */
     font-family: "Fira Sans", sans-serif;
     color: var(--color-text);
+}
+
+a {
+    color: var(--color-orange)
+}
+
+ul {
+    display: table;
+    margin: 0 auto;
 }
 
 body {

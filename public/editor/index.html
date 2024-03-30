@@ -2,9 +2,11 @@
     <head>
         <title>New Project - Dawnline</title>
         <link rel="stylesheet" href="/css/editor.css">
+        <link rel="manifest" href="/manifest.json" />
     </head>
     <body>
-        <div class="menubar">
+        <div id="channel-deck"></div>
+        <div id="menubar">
             <div class="menubar-item" id="button-logo">
                 <img src="/images/logo.png" width="65">
             </div>
@@ -18,14 +20,15 @@
                 <p>View</p>
             </div>
         </div>
-        <div id="channel-deck"></div>
         <div id="menu" tabindex=0 style="display:none;"></div>
         <div id="fade-background" style="display:none;"></div>
         <div class="window" id="window-about" style="display:none;">
             <h1>About Dawnline</h1>
-            <p>Dawnline was started by TurnOffTheTV, but these people have also contributed:</p>
-            <!--<ul></ul>-->
-            <a>Dawnline is open-source on <a href="https://github.com/TurnOffTheTV/dawnline">GitHub</a>!</p>
+            <p>Dawnline was created by these people:</p>
+            <ul>
+                <li>TurnOffTheTV</li>
+            </ul>
+            <p>Dawnline is open-source on <a href="https://github.com/TurnOffTheTV/dawnline">GitHub</a>!</p>
         </div>
         <div class="window" id="window-rename" style="display:none;">
             <h1>Rename Project</h1>

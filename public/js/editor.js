@@ -32,11 +32,17 @@ var patches = [];
 
 //channel class for above array
 class Channel {
-    constructor(){
-        this.audio=audioContext.createBuffer(1,0,441000);
+    constructor(index){
+        this.name="channel-"+index;
+        this.audio=audioContext.createBuffer(1,1,441000);
         this.el=document.createElement("div");
-        this.el.class="channel";
+        this.el.className="channel";
+        let infoBox = document.createElement("div");
+        infoBox.className="channel-infobox";
+        infoBox.innerHTML="<h4>"+this.name+"</h4>";
+        this.el.appendChild(infoBox);
         let waveCanvas = document.createElement("canvas");
+        this.el.appendChild(waveCanvas);
         this.waveDisplay=waveCanvas.getContext("2d");
         channelDeck.appendChild(this.el);
     }
@@ -141,7 +147,7 @@ const editMenu = [
         label: "New Channel",
         image: "plus",
         click: function(){
-            channels.push(new Channel());
+            channels.push(new Channel(channels.length));
         }
     },
 ];
