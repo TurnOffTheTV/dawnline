@@ -70,15 +70,21 @@
 }
 
 #channel-deck {
+
+    /* position and size */
     position:absolute;
-    display: flex;
-    flex-direction: column;
     top: 85px;
     left:0px;
     width:100%;
-    overflow-y: scroll;
     margin: 0px;
     padding: 0px;
+
+    /* flexbox setup */
+    display: flex;
+    flex-direction: column;
+    
+    /* scrolling */
+    overflow-y: scroll;
 }
 
 .menu-item {
@@ -166,11 +172,14 @@
     border-top: none;
 }
 .channel-infobox {
+    /* sizing and positioning */
     height: 100%;
     width: 100px;
+    padding-left: 10px;
+
+    /* colors */
     border-right: solid 1px var(--color-gray);
     background-color: var(--color-background-secondary);
-    padding-left: 10px;
 }
 
 input {
@@ -184,10 +193,12 @@ input {
 }
 
 a {
+    /* make links orange */
     color: var(--color-orange)
 }
 
 ul {
+    /* center list items */
     display: table;
     margin: 0 auto;
 }

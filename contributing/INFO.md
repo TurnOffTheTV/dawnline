@@ -8,6 +8,8 @@ Make all changes on the development branch. When I've decided there's enough new
 
 When writing code, try to follow the style. Maybe you think it's weird, but it's how I write JavaScript. Also, make sure to comment. You don't need a comment on every line, but each block should be explained.
 
+If you've contributed any code, feel free to add your name to the About window in the editor.
+
 ## Writing Documentation
 
 There's not a lot to this app at this point, but eventually there will be, and we're going to need some documentation for all the features.

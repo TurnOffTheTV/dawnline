@@ -1,7 +1,7 @@
 {
   "name": "dawnline",
   "version": "1.0.0",
-  "description": "Online DAW",
+  "description": "An online DAW",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
