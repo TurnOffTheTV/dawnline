@@ -64,16 +64,43 @@
     width: 300px;
     position: absolute;
 
+    /* border */
+    border: solid 1px var(--color-gray);
+    border-bottom: none;
+
     /* displaying */
     background-color: var(--color-background-secondary);
     flex-direction: column;
+}
+
+#controlbar {
+    /* position and size */
+    position: fixed;
+    left: 0px;
+    top: 85px;
+    width: 100%;
+    height: 15px;
+
+    /* more sizing stuff */
+    margin: 0px;
+    padding: 0px;
+    padding-left: 85px;
+
+    /* colors */
+    border-bottom: solid 1px var(--color-gray);
+    background-color: var(--color-background);
+
+    /* flexbox */
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
 }
 
 #channel-deck {
 
     /* position and size */
     position:absolute;
-    top: 85px;
+    top: 100px;
     left:0px;
     width:100%;
     margin: 0px;
@@ -97,7 +124,7 @@
     flex-direction: row;
 
     /* border */
-    border: solid 1px var(--color-gray);
+    border-bottom: solid 1px var(--color-gray);
 
     /* more sizing stuff */
     padding: 5px;
@@ -140,6 +167,26 @@
     background-color: var(--color-orange);
 }
 
+.controlbar-item {
+    /* size */
+    width: 15px;
+    height: 15px;
+
+    /* more sizing stuff */
+    margin: 0px;
+    padding: auto;
+    text-align: center;
+    align-content: center;
+
+    /* cursor */
+    cursor: pointer;
+}
+
+.controlbar-item:hover {
+    /* hover color */
+    background-color: var(--color-orange);
+}
+
 .window {
     /* color */
     background-color: var(--color-background);
@@ -176,10 +223,16 @@
     height: 100%;
     width: 100px;
     padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
 
     /* colors */
     border-right: solid 1px var(--color-gray);
     background-color: var(--color-background-secondary);
+
+    /* flexbox stuff */
+    display: flex;
+    flex-direction: column;
 }
 
 input {

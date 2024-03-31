@@ -18,8 +18,8 @@ const renameWindow = document.getElementById("window-rename");
 
 //get Web Audio context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioContext = new AudioContext();
-const analyser = audioContext.createAnalyser();
+const audioCtx = new AudioContext();
+const analyser = audioCtx.createAnalyser();
 
 //variables for project content
 var projectInfo = {
@@ -33,17 +33,61 @@ var patches = [];
 //channel class for above array
 class Channel {
     constructor(index){
+        //give channel a unique 5-digit id
+        while(true){
+            this.id=10000+Math.floor(Math.random()*90000);
+            for(var i=0;i<channels.length;i++){
+            }
+            if(i===channels.length){
+                break;
+            }
+        }
+
+        //set default name
         this.name="channel-"+index;
-        this.audio=audioContext.createBuffer(1,1,441000);
+        //set up audio output
+        this.track=audioCtx.createBuffer(1,1,441000);
+        this.panner=new StereoPannerNode(audioCtx,{pan:this.pan});
+        //this.track.connect(this.panner).connect(audioCtx.destination);
+
+        //add channel element
         this.el=document.createElement("div");
         this.el.className="channel";
+        this.el.id="channel-"+this.id;
+
+        //add box for channel controls
         let infoBox = document.createElement("div");
         infoBox.className="channel-infobox";
         infoBox.innerHTML="<h4>"+this.name+"</h4>";
         this.el.appendChild(infoBox);
+
+        //add panning slider
+        this.panInput = document.createElement("input");
+        this.panInput.type="range";
+        this.panInput.value=0;
+        this.panInput.min=-1;
+        this.panInput.max=1;
+        this.panInput.step=0.01;
+        this.panInput.addEventListener("mousemove",function(e){
+            //set panner amount when changed
+            channels.find(function(el){
+                return el.id == e.target.parentElement.parentElement.id.split("-")[1];
+            }).panner.pan.value=e.target.valueAsNumber;
+            //snap to 0
+            if(e.target.valueAsNumber<0.1 && e.target.valueAsNumber>-0.1){
+                e.target.step=0.2;
+            }else{
+                e.target.step=0.01;
+            }
+        })
+        infoBox.appendChild(this.panInput);
+
+        //add canvas for audio wave
         let waveCanvas = document.createElement("canvas");
         this.el.appendChild(waveCanvas);
         this.waveDisplay=waveCanvas.getContext("2d");
+
+        //add channel to channel deck
         channelDeck.appendChild(this.el);
     }
 
@@ -58,6 +102,11 @@ class Patch {
 
     drawWave(){}
 }
+
+//context menu
+window.addEventListener("contextmenu",function(e){
+    e.preventDefault();
+});
 
 //make rename button rename project
 button.rename.addEventListener("click",function(){
