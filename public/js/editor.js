@@ -29,6 +29,8 @@ var projectInfo = {
 var channels = [];
 //list of patches
 var patches = [];
+//file worker
+const fileWorker = new Worker("/js/dlp.js");
 
 //channel class for above array
 class Channel {
@@ -79,8 +81,23 @@ class Channel {
             }else{
                 e.target.step=0.01;
             }
-        })
+        });
         infoBox.appendChild(this.panInput);
+
+        //add remove button
+        let removeButton = document.createElement("div");
+        removeButton.innerHTML='<img src="/images/remove.svg" width=10>';
+        removeButton.className="channel-remove";
+        removeButton.addEventListener("click",function(e){
+            
+            let channel = channels.find(function(el){
+                return el.id == e.target.parentElement.parentElement.parentElement.id.split("-")[1];
+            });
+            if(confirm("Do you really want to delete "+channel.name+"?")){
+                channel.remove();
+            }
+        });
+        infoBox.appendChild(removeButton);
 
         //add canvas for audio wave
         let waveCanvas = document.createElement("canvas");
@@ -92,12 +109,25 @@ class Channel {
     }
 
     drawWave(){}
+
+    remove(){
+        this.el.remove();
+        channels.splice(channels.indexOf(this),1);
+    }
 }
 
 //patch class for above array
 class Patch {
     constructor(){
-        
+        //give patch a unique 5-digit id
+        while(true){
+            this.id=10000+Math.floor(Math.random()*90000);
+            for(var i=0;i<patches.length;i++){
+            }
+            if(i===patches.length){
+                break;
+            }
+        }
     }
 
     drawWave(){}
@@ -114,6 +144,8 @@ button.rename.addEventListener("click",function(){
     document.getElementsByTagName("title")[0].innerText=projectInfo.name+" - Dawnline";
     fadeBackground.click();
 });
+
+const dlpFileOpts = {types:[{accept:{"application/dlp":[".dlp"]}}]}
 
 //menu data for the logo menu
 const logoMenu = [
@@ -152,14 +184,14 @@ const fileMenu = [
         label: "Open",
         image: "arrow-up",
         click: function(){
-            alert("Opening old file")
+            fileWorker.postMessage({command:"openFile"});
         }
     },
     {
         label: "Save",
         image: "arrow-down",
         click: function(){
-            alert("Saving file")
+            fileWorker.postMessage({command:"saveFile"});
         }
     },
     {
@@ -176,18 +208,21 @@ const fileMenu = [
 const editMenu = [
     {
         label: "Cut",
+        image: "cut",
         click: function(){
             alert("Cut")
         }
     },
     {
         label: "Copy",
+        image: "copy",
         click: function(){
             alert("Copy")
         }
     },
     {
         label: "Paste",
+        image: "paste",
         click: function(){
             alert("Paste")
         }

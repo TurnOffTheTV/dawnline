@@ -19,6 +19,9 @@
         --color-background-tertiary: rgb(100,100,100);
         --color-text: white;
     }
+
+    /* prevent highlighting text */
+    user-select: none;
 }
 
 #menubar {
@@ -218,6 +221,7 @@
     border: solid 1px var(--color-gray);
     border-top: none;
 }
+
 .channel-infobox {
     /* sizing and positioning */
     height: 100%;
@@ -233,6 +237,16 @@
     /* flexbox stuff */
     display: flex;
     flex-direction: column;
+}
+
+.channel-remove {
+    /* position */
+    position: absolute;
+    float: left;
+    left:0px;
+
+    /* cursor */
+    cursor: pointer;
 }
 
 input {
