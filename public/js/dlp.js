@@ -1,24 +1,21 @@
 //dlp.js
 //create and parse Dawnline project files (dlp for DawnLine Project)
 
-onmessage =function(e){
-    console.log(e);
-    if(e.data.command==="openFile"){
-        window.showOpenFilePicker(dlpFileOpts).then(function(res){
-            console.log(res["0"]);
-        })
-    }
-    if(e.data.command==="saveFile"){
-        window.showSaveFilePicker(dlpFileOpts).then(function(res){
-            console.log(res.createSyncAccessHandle());
-        })
-    }
-}
-
 function createDlp(projObj){
-    console.log(projObj.name.length)
+    let bytes = new DataView(new ArrayBuffer(projObj.name.length+3));
+    bytes.setUint8(0,projObj.name);
+    bytes.setUint16(projObj.name.length,projObj.channels);
+    return bytes;
 }
 
-function parseDlp(bytes){
-
+async function parseDlp(blob){
+    let projObj = {
+        name:"New Project",
+        channels:[]
+    };
+    let textDecoder = new TextDecoder();
+    let bytes = new DataView(await blob.arrayBuffer());
+    projObj.name=textDecoder.decode(bytes).slice(1,bytes.getUint8(0)+1);
+    let numChannels = bytes.getUint16(bytes.getUint8(0)+1);
+    return projObj;
 }

@@ -30,7 +30,7 @@ var channels = [];
 //list of patches
 var patches = [];
 //file worker
-const fileWorker = new Worker("/js/dlp.js");
+var fileWriter;
 
 //channel class for above array
 class Channel {
@@ -142,10 +142,11 @@ window.addEventListener("contextmenu",function(e){
 button.rename.addEventListener("click",function(){
     projectInfo.name=document.getElementById("input-rename").value;
     document.getElementsByTagName("title")[0].innerText=projectInfo.name+" - Dawnline";
+    dlpFileOpts.suggestedName=projectInfo.name+".dlp";
     fadeBackground.click();
 });
 
-const dlpFileOpts = {types:[{accept:{"application/dlp":[".dlp"]}}]}
+var dlpFileOpts = {types:[{accept:{"application/dlp":[".dlp"]}}],suggestedName:"New Project.dlp"}
 
 //menu data for the logo menu
 const logoMenu = [
@@ -184,14 +185,26 @@ const fileMenu = [
         label: "Open",
         image: "arrow-up",
         click: function(){
-            fileWorker.postMessage({command:"openFile"});
+            window.showOpenFilePicker(dlpFileOpts).then(async function(res){
+                res["0"].getFile().then(async function(file){
+                    console.log(await parseDlp(file));
+                });
+                fileWriter = await res["0"].createWritable();
+            })
         }
     },
     {
         label: "Save",
         image: "arrow-down",
         click: function(){
-            fileWorker.postMessage({command:"saveFile"});
+            if(fileWriter){
+                fileWriter.write(createDlp({name:projectInfo.name,channels:channels}));
+            }else{
+                window.showSaveFilePicker(dlpFileOpts).then(async function(res){
+                    fileWriter = await res.createWritable();
+                    fileWriter.write(createDlp({name:projectInfo.name,channels:channels}));
+                });
+            }
         }
     },
     {
@@ -257,16 +270,13 @@ fadeBackground.addEventListener("click",function(e){
 //change menu element for menubar
 {
         menu.addEventListener("focus",function(e){
-        console.log("menu visible")
         menu.style.display="flex";
     });
     menu.onblur =function(e){
         menu.style.display="none";
-        console.log("menu blurred")
     }
     menu.addEventListener("click",function(e){
         menu.style.display="none";
-        console.log("menu clicked")
     })
 
     //set menu with menubar buttons
@@ -327,7 +337,6 @@ function setMenubarItemMenu(menuData,buttonData){
     }
     menu.style.left=buttonData.getBoundingClientRect().x+"px";
     menu.style.top=buttonData.getBoundingClientRect().y+buttonData.getBoundingClientRect().height+"px";
-    console.log("set menu")
 }
 
 //returns true if user is in dark mode
