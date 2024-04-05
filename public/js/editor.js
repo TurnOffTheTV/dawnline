@@ -260,12 +260,31 @@ const viewMenu = [
     }
 ];
 
+//register service worker
+async function registerServiceWorker(){
+    try {
+        const registration = await navigator.serviceWorker.register("/js/sw.js", {
+            scope:"/",
+        });
+        if(registration.installing){
+            console.log("Service worker installing");
+        }else if(registration.waiting){
+            console.log("Service worker installed");
+        }else if(registration.active){
+            console.log("Service worker active");
+        }
+    }catch(err){
+        console.error(err);
+    }
+};
+registerServiceWorker();
+
 //close windows
 fadeBackground.addEventListener("click",function(e){
     fadeBackground.style.display="none";
     aboutWindow.style.display="none";
     renameWindow.style.display="none";
-})
+});
 
 //change menu element for menubar
 {
