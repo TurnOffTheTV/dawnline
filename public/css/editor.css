@@ -127,6 +127,15 @@
     overflow-y: scroll;
 }
 
+#synth-overlay {
+    /* positioning and size */
+    position: absolute;
+    left:0px;
+    top:101px;
+    width:100%;
+    height:calc(100% - 100px);
+}
+
 .menu-item {
     /* size */
     width: 100%;

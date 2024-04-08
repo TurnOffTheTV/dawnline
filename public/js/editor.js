@@ -29,6 +29,8 @@ var projectInfo = {
 var channels = [];
 //list of patches
 var patches = [];
+//wether there are any changes
+var changed = false;
 //file worker
 var fileWriter;
 
@@ -50,7 +52,7 @@ class Channel {
         //set up audio output
         this.track=audioCtx.createBuffer(1,1,441000);
         this.panner=new StereoPannerNode(audioCtx,{pan:this.pan});
-        //this.track.connect(this.panner).connect(audioCtx.destination);
+        this.track.connect(this.panner).connect(audioCtx.destination);
 
         //add channel element
         this.el=document.createElement("div");
@@ -141,6 +143,9 @@ window.addEventListener("contextmenu",function(e){
 //make rename button rename project
 button.rename.addEventListener("click",function(){
     projectInfo.name=document.getElementById("input-rename").value;
+    if(projectInfo.name.length<=0){
+        projectInfo.name="New Project";
+    }
     document.getElementsByTagName("title")[0].innerText=projectInfo.name+" - Dawnline";
     dlpFileOpts.suggestedName=projectInfo.name+".dlp";
     fadeBackground.click();
@@ -211,6 +216,7 @@ const fileMenu = [
         label: "Rename",
         image: "pencil",
         click: function(){
+            document.getElementById("input-rename").value=projectInfo.name;
             fadeBackground.style.display="block";
             renameWindow.style.display="block";
         }
@@ -244,9 +250,17 @@ const editMenu = [
         label: "New Channel",
         image: "plus",
         click: function(){
+            changed=true;
             channels.push(new Channel(channels.length));
         }
     },
+    {
+        label: "New Synth Patch",
+        image: "plus",
+        click: function(){
+            synthDiv.style.display="block";
+        }
+    }
 ];
 
 //menu data for the View menu
