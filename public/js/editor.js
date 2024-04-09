@@ -18,7 +18,7 @@ const renameWindow = document.getElementById("window-rename");
 
 //get Web Audio context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
+const audioCtx = new AudioContext({sampleRate:44100});
 const analyser = audioCtx.createAnalyser();
 
 //variables for project content
@@ -50,7 +50,8 @@ class Channel {
         //set default name
         this.name="channel-"+index;
         //set up audio output
-        this.track=audioCtx.createBuffer(1,1,441000);
+        this.audio=new AudioBuffer({length:1});
+        this.track=new AudioBufferSourceNode(audioCtx,{buffer:this.audio});
         this.panner=new StereoPannerNode(audioCtx,{pan:this.pan});
         this.track.connect(this.panner).connect(audioCtx.destination);
 

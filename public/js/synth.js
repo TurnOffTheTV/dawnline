@@ -1,9 +1,18 @@
+//synth.js
+//control the software modular synth and interface
+
 const synthDiv = document.getElementById("synth-overlay");
 //set up canvas element and context
 const synthCanvas = document.createElement("canvas");
 synthCanvas.style="width:100%;height:100%;margin:0px;border:0px;outline:0px;";
 synthDiv.appendChild(synthCanvas);
 const sc = synthCanvas.getContext("2d");
+
+synthCanvas.width = synthCanvas.clientWidth;
+synthCanvas.height = synthCanvas.clientHeight;
+
+var cx = 0;
+var cy = 0;
 
 //input/output types:
 //0 - single audio channel
@@ -57,6 +66,22 @@ class Oscillator extends SynthModule {
         super(x,y,1,new OscillatorNode(audioCtx));
         this.inputs=[new Port(1,"Frequency Change")];
         this.outputs=[new Port(0,"Tone")];
+        //this.node.connect(audioCtx.destination);
+        //this.node.start();
+    }
+
+    draw(){
+        sc.fillStyle="#203847";
+        sc.fillRect(this.x+cx,this.y+cy,100,100);
+    }
+}
+
+//midi input
+class MidiFreq extends SynthModule {
+    constructor(x,y){
+        super(x,y,1,undefined);
+        this.inputs=[];
+        this.outputs=[new Port(2,"Midi Frequency")]
     }
 }
 
@@ -66,9 +91,21 @@ function draw(){
     if(isDark()){sc.fillStyle="rgb(50,50,50)";}else{sc.fillStyle="white";}
     sc.fillRect(0,0,synthCanvas.width,synthCanvas.height);
 
+    //draw the modules
+
+    for(var i=0;i<modules.length;i++){
+        modules[i].draw();
+    }
+
     //animate next frame
     requestAnimationFrame(draw);
 }
 
 //animate the canvas
 requestAnimationFrame(draw);
+
+//resize canvas when it is resized
+synthCanvas.addEventListener("resize",function(){
+    synthCanvas.width = synthCanvas.clientWidth;
+    synthCanvas.height = synthCanvas.clientHeight;
+})

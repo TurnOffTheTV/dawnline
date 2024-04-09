@@ -129,7 +129,7 @@
 
 #synth-overlay {
     /* positioning and size */
-    position: absolute;
+    position: fixed;
     left:0px;
     top:101px;
     width:100%;

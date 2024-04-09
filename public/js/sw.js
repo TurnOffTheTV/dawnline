@@ -1,15 +1,21 @@
+//sw.js
+//Dawnline's service worker
+
 async function addResourcesToCache(files){
     let cache = await caches.open("v1.0.0");
     await cache.addAll(files);
 };
-  
+
+//cache the whole website
 self.addEventListener("install",function(e){
     e.waitUntil(
         addResourcesToCache([
+            "/",
             "/favicon.ico",
             "/manifest.json",
             "/editor/",
             "/css/editor.css",
+            "/css/main.css",
             "/js/editor.js",
             "/js/dlp.js",
             "/js/synth.js",
@@ -28,6 +34,7 @@ self.addEventListener("install",function(e){
     );
 });
 
+//send back cache stuff
 self.addEventListener("fetch",function(e){
     e.respondWith(caches.match(e.request));
 });
