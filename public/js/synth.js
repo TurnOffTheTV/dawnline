@@ -1,9 +1,10 @@
 //synth.js
-//control the software modular synth and interface
+//control the software modular synth and its canvas-based interface
 
 const synthDiv = document.getElementById("synth-overlay");
 //set up canvas element and context
 const synthCanvas = document.createElement("canvas");
+const synthName = document.getElementById("synth-name");
 synthCanvas.style="width:100%;height:100%;margin:0px;border:0px;outline:0px;";
 synthDiv.appendChild(synthCanvas);
 const sc = synthCanvas.getContext("2d");
@@ -88,8 +89,11 @@ class MidiFreq extends SynthModule {
 //callback for returnAnimationFrame
 function draw(){
     //background
-    if(isDark()){sc.fillStyle="rgb(50,50,50)";}else{sc.fillStyle="white";}
+    if(isDark()){sc.fillStyle="rgb(75,75,75)";}else{sc.fillStyle="rgb(225,225,225)";}
     sc.fillRect(0,0,synthCanvas.width,synthCanvas.height);
+
+    sc.fillStyle="black";
+    sc.fillRect(synthCanvas.width/2-10+cx,synthCanvas.height/2-10+cy,20,20);
 
     //draw the modules
 
@@ -99,13 +103,20 @@ function draw(){
 
     //animate next frame
     requestAnimationFrame(draw);
+    console.log("Drew frame")
 }
 
 //animate the canvas
 requestAnimationFrame(draw);
 
 //resize canvas when it is resized
-synthCanvas.addEventListener("resize",function(){
+addEventListener("resize",function(){
     synthCanvas.width = synthCanvas.clientWidth;
     synthCanvas.height = synthCanvas.clientHeight;
+});
+
+synthCanvas.addEventListener("wheel",function(e){
+    cx-=e.deltaX;
+    cy-=e.deltaY;
+    e.preventDefault();
 })

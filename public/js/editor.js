@@ -8,6 +8,7 @@ const button = {
     file:document.getElementById("button-file"),
     edit:document.getElementById("button-edit"),
     view:document.getElementById("button-view"),
+    synth:document.getElementById("button-synth"),
     rename:document.getElementById("button-rename")
 };
 const fadeBackground = document.getElementById("fade-background");
@@ -15,6 +16,7 @@ const menu = document.getElementById("menu");
 const channelDeck = document.getElementById("channel-deck");
 const aboutWindow = document.getElementById("window-about");
 const renameWindow = document.getElementById("window-rename");
+const addModuleWindow = document.getElementById("window-addmodule");
 
 //get Web Audio context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -260,6 +262,9 @@ const editMenu = [
         image: "plus",
         click: function(){
             synthDiv.style.display="block";
+            button.synth.style.display="";
+            synthCanvas.width = synthCanvas.clientWidth;
+            synthCanvas.height = synthCanvas.clientHeight;
         }
     }
 ];
@@ -271,6 +276,18 @@ const viewMenu = [
         image: "midi",
         click: function(){
             alert("KEYboard")
+        }
+    }
+];
+
+//menu data for the Synth menu
+const synthMenu = [
+    {
+        label: "Add Module",
+        image: "plus",
+        click: function(){
+            fadeBackground.style.display="block";
+            addModuleWindow.style.display="block";
         }
     }
 ];
@@ -299,6 +316,7 @@ fadeBackground.addEventListener("click",function(e){
     fadeBackground.style.display="none";
     aboutWindow.style.display="none";
     renameWindow.style.display="none";
+    addModuleWindow.style.display="none";
 });
 
 //change menu element for menubar
@@ -345,6 +363,15 @@ fadeBackground.addEventListener("click",function(e){
         setMenubarItemMenu(viewMenu,button.view);
     });
     button.view.addEventListener("click",function(e){
+        menu.style.display="flex";
+        menu.focus();
+        e.preventDefault();
+    });
+
+    button.synth.addEventListener("mouseover",function(){
+        setMenubarItemMenu(synthMenu,button.synth);
+    });
+    button.synth.addEventListener("click",function(e){
         menu.style.display="flex";
         menu.focus();
         e.preventDefault();

@@ -160,7 +160,7 @@
 
 .menu-item:hover {
     /* hover color */
-    background-color: var(--color-orange);
+    background-color: var(--color-background-tertiary);
 }
 
 .menubar-item {
@@ -186,7 +186,7 @@
 
 .menubar-item:hover {
     /* hover color */
-    background-color: var(--color-orange);
+    background-color: var(--color-background-secondary);
 }
 
 .controlbar-item {
@@ -269,6 +269,35 @@
 
     /* cursor */
     cursor: pointer;
+}
+
+.scrollmenu {
+    /* flexbox */
+    display:flex;
+    flex-direction:column;
+    height: 250px;
+    
+    /* colors */
+    background-color:var(--color-background-secondary);
+    border: solid 1px var(--color-gray);
+    overflow-y: scroll;
+}
+
+.scrollmenu-item {
+    /* sizing */
+    height: 25px;
+    vertical-align: middle;
+
+    /* seperation */
+    border-bottom: solid 1px var(--color-gray);
+
+    /* cursor */
+    cursor: pointer;
+}
+
+.scrollmenu-item:hover {
+    /* hover color */
+    background-color: var(--color-background-tertiary);
 }
 
 input {
