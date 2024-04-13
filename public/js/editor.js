@@ -9,7 +9,8 @@ const button = {
     edit:document.getElementById("button-edit"),
     view:document.getElementById("button-view"),
     synth:document.getElementById("button-synth"),
-    rename:document.getElementById("button-rename")
+    rename:document.getElementById("button-rename"),
+    renameSynth:document.getElementById("button-renamesynth")
 };
 const fadeBackground = document.getElementById("fade-background");
 const menu = document.getElementById("menu");
@@ -17,6 +18,7 @@ const channelDeck = document.getElementById("channel-deck");
 const aboutWindow = document.getElementById("window-about");
 const renameWindow = document.getElementById("window-rename");
 const addModuleWindow = document.getElementById("window-addmodule");
+const renameSynthWindow = document.getElementById("window-renamesynth");
 
 //get Web Audio context
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -26,7 +28,11 @@ const analyser = audioCtx.createAnalyser();
 //variables for project content
 var projectInfo = {
     name: "New Project"
-}
+};
+//variables for synth patch content
+var patchInfo = {
+    name: "New Synth Patch"
+};
 //list of channels
 var channels = [];
 //list of patches
@@ -52,7 +58,7 @@ class Channel {
         //set default name
         this.name="channel-"+index;
         //set up audio output
-        this.audio=new AudioBuffer({length:1});
+        this.audio=new AudioBuffer({length:1,sampleRate:44100});
         this.track=new AudioBufferSourceNode(audioCtx,{buffer:this.audio});
         this.panner=new StereoPannerNode(audioCtx,{pan:this.pan});
         this.track.connect(this.panner).connect(audioCtx.destination);
@@ -154,6 +160,21 @@ button.rename.addEventListener("click",function(){
     fadeBackground.click();
 });
 
+button.renameSynth.addEventListener("click",function(){
+    patchInfo.name=document.getElementById("input-rename").value;
+    if(patchInfo.name.length<=0){
+        patchInfo.name="New Project";
+    }
+    document.getElementsByTagName("title")[0].innerText=patchInfo.name+" - Dawnline";
+    dlpFileOpts.suggestedName=patchInfo.name+".dlp";
+    fadeBackground.click();
+});
+
+synthName.addEventListener("click",function(){
+    
+})
+
+//for file open/save
 var dlpFileOpts = {types:[{accept:{"application/dlp":[".dlp"]}}],suggestedName:"New Project.dlp"}
 
 //menu data for the logo menu
@@ -186,17 +207,31 @@ const fileMenu = [
         label: "New",
         image: "plus",
         click: function(){
-            alert("Creating new file")
+            //TODO: reset project info
         }
     },
     {
         label: "Open",
         image: "arrow-up",
         click: function(){
+            //show file picker
             window.showOpenFilePicker(dlpFileOpts).then(async function(res){
                 res["0"].getFile().then(async function(file){
-                    console.log(await parseDlp(file));
+                    changed=true;
+                    //get info from DLP file
+                    let projObj = await parseDlp(file);
+                    projectInfo.name=projObj.name;
+
+                    //set up channels
+                    channels=[];
+                    channelDeck.innerHTML="";
+                    for(var i=0;i<projObj.channels.length;i++){
+                        //TODO: add channels based on file data
+                    }
+                    document.getElementsByTagName("title")[0].innerText=projectInfo.name+" - Dawnline";
                 });
+
+                //create file writer
                 fileWriter = await res["0"].createWritable();
             })
         }
@@ -206,10 +241,13 @@ const fileMenu = [
         image: "arrow-down",
         click: function(){
             if(fileWriter){
+                //save if we can
                 fileWriter.write(createDlp({name:projectInfo.name,channels:channels}));
             }else{
+                //if we can't, we ask to save
                 window.showSaveFilePicker(dlpFileOpts).then(async function(res){
                     fileWriter = await res.createWritable();
+                    console.log(createDlp({name:projectInfo.name,channels:channels}));
                     fileWriter.write(createDlp({name:projectInfo.name,channels:channels}));
                 });
             }
@@ -219,6 +257,7 @@ const fileMenu = [
         label: "Rename",
         image: "pencil",
         click: function(){
+            //show the rename window
             document.getElementById("input-rename").value=projectInfo.name;
             fadeBackground.style.display="block";
             renameWindow.style.display="block";
@@ -261,6 +300,7 @@ const editMenu = [
         label: "New Synth Patch",
         image: "plus",
         click: function(){
+            changed=true;
             synthDiv.style.display="block";
             button.synth.style.display="";
             synthCanvas.width = synthCanvas.clientWidth;
@@ -286,6 +326,7 @@ const synthMenu = [
         label: "Add Module",
         image: "plus",
         click: function(){
+            //show the window for adding modules
             fadeBackground.style.display="block";
             addModuleWindow.style.display="block";
         }
@@ -317,6 +358,7 @@ fadeBackground.addEventListener("click",function(e){
     aboutWindow.style.display="none";
     renameWindow.style.display="none";
     addModuleWindow.style.display="none";
+    renameSynthWindow.style.display="none";
 });
 
 //change menu element for menubar
@@ -404,3 +446,8 @@ function setMenubarItemMenu(menuData,buttonData){
 function isDark(){
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
+
+//tell the user if they try to close with unsaved work
+addEventListener("beforeunload",function(e){
+    if(changed){e.preventDefault();}
+});

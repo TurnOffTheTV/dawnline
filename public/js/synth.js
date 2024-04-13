@@ -8,10 +8,10 @@ const synthName = document.getElementById("synth-name");
 synthCanvas.style="width:100%;height:100%;margin:0px;border:0px;outline:0px;";
 synthDiv.appendChild(synthCanvas);
 const sc = synthCanvas.getContext("2d");
-
 synthCanvas.width = synthCanvas.clientWidth;
 synthCanvas.height = synthCanvas.clientHeight;
 
+//"camera" position for scrolling
 var cx = 0;
 var cy = 0;
 
@@ -92,6 +92,7 @@ function draw(){
     if(isDark()){sc.fillStyle="rgb(75,75,75)";}else{sc.fillStyle="rgb(225,225,225)";}
     sc.fillRect(0,0,synthCanvas.width,synthCanvas.height);
 
+    //TEST of scrolling
     sc.fillStyle="black";
     sc.fillRect(synthCanvas.width/2-10+cx,synthCanvas.height/2-10+cy,20,20);
 
@@ -103,7 +104,6 @@ function draw(){
 
     //animate next frame
     requestAnimationFrame(draw);
-    console.log("Drew frame")
 }
 
 //animate the canvas
@@ -115,6 +115,7 @@ addEventListener("resize",function(){
     synthCanvas.height = synthCanvas.clientHeight;
 });
 
+//scroll with mouse wheel or trackpad or whatever
 synthCanvas.addEventListener("wheel",function(e){
     cx-=e.deltaX;
     cy-=e.deltaY;
