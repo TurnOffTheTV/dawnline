@@ -4,11 +4,11 @@
 
 (DAW + online = DAWnline)
 
-An advanced web app for working with audio. Currently a work in progress.
+An advanced, modern web app for working with audio. Currently a work in progress.
 
 With it, you ~~can~~ will be able to
 
-- Make and mix music, with WebMIDI support
+- Make and mix music, with support for MIDI input
 - Create patches with a software synthesizer
 - Edit audio files, with tools to trim, splice and add effects
 

@@ -1,5 +1,15 @@
 /* load font */
-@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+/*@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');*/
+
+@font-face {
+    font-family: "Fira Sans";
+    src: url("/fonts/fira.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Fira Sans Light";
+    src: url("/fonts/fira-light.ttf") format("truetype");
+}
 
 :root {
     /* theme colors */
@@ -8,28 +18,23 @@
 
     /* basic colors */
     --color-background: white;
-    --color-background-secondary: gray;
+    --color-background-secondary: rgb(225,225,225);
+    --color-background-tertiary: rgb(200,200,200);
     --color-text: black;
 
     /* colors for dark mode */
     @media (prefers-color-scheme: dark) {
         --color-background: rgb(50,50,50);
-        --color-background-secondary: dimgrey;
+        --color-background-secondary: rgb(75,75,75);
+        --color-background-tertiary: rgb(100,100,100);
         --color-text: white;
     }
+
+    /* prevent highlighting text */
+    user-select: none;
 }
 
-#menu {
-    width: 300px;
-    position: absolute;
-    background-color: var(--color-background-secondary);
-}
-
-.menu-item {
-    width: 300px;
-}
-
-.menubar {
+#menubar {
     /* position and size */
     position: fixed;
     left: 0px;
@@ -41,13 +46,121 @@
     margin: 0px;
     padding: 5px;
 
-    /* border */
+    /* colors */
     border-bottom: solid 1px var(--color-gray);
+    background-color: var(--color-background);
 
     /* flexbox */
     display: flex;
     flex-direction: row;
     flex-basis: auto;
+}
+
+#fade-background {
+    /* the all-important faded background of the fade background */
+    background-color: rgba(255,255,255,0.75);
+
+    @media (prefers-color-scheme: dark) {
+        background-color: rgba(0,0,0,0.75);
+    }
+
+    /* position and size */
+    position: fixed;
+    left:0px;
+    top:0px;
+    width:100%;
+    height:100%;
+}
+
+#menu {
+    /* position and size */
+    width: 300px;
+    position: absolute;
+
+    /* border */
+    border: solid 1px var(--color-gray);
+    border-bottom: none;
+
+    /* displaying */
+    background-color: var(--color-background-secondary);
+    flex-direction: column;
+}
+
+#controlbar {
+    /* position and size */
+    position: fixed;
+    left: 0px;
+    top: 85px;
+    width: 100%;
+    height: 15px;
+
+    /* more sizing stuff */
+    margin: 0px;
+    padding: 0px;
+    padding-left: 85px;
+
+    /* colors */
+    border-bottom: solid 1px var(--color-gray);
+    background-color: var(--color-background);
+
+    /* flexbox */
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+}
+
+#channel-deck {
+
+    /* position and size */
+    position:absolute;
+    top: 100px;
+    left:0px;
+    width:100%;
+    margin: 0px;
+    padding: 0px;
+
+    /* flexbox setup */
+    display: flex;
+    flex-direction: column;
+    
+    /* scrolling */
+    overflow-y: scroll;
+}
+
+#synth-overlay {
+    /* positioning and size */
+    position: fixed;
+    left:0px;
+    top:101px;
+    width:100%;
+    height:calc(100% - 100px);
+}
+
+.menu-item {
+    /* size */
+    width: 100%;
+    height: 50px;
+
+    /* display */
+    display: flex;
+    flex-direction: row;
+
+    /* border */
+    border-bottom: solid 1px var(--color-gray);
+
+    /* more sizing stuff */
+    padding: 5px;
+
+    /* color */
+    background-color: var(--color-background-secondary);
+
+    /* cursor */
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    /* hover color */
+    background-color: var(--color-background-tertiary);
 }
 
 .menubar-item {
@@ -65,18 +178,151 @@
     align-content: center;
 
     /* font */
-    font-weight: 300;
+    font-family: "Fira Sans Light";
 
     /* cursor */
     cursor: pointer;
 }
 
 .menubar-item:hover {
-    background-color: var(--color-gray);
+    /* hover color */
+    background-color: var(--color-background-secondary);
+}
+
+.controlbar-item {
+    /* size */
+    width: 15px;
+    height: 15px;
+
+    /* more sizing stuff */
+    margin: 0px;
+    padding: auto;
+    text-align: center;
+    align-content: center;
+
+    /* cursor */
+    cursor: pointer;
+}
+
+.controlbar-item:hover {
+    /* hover color */
+    background-color: var(--color-orange);
+}
+
+.window {
+    /* color */
+    background-color: var(--color-background);
+
+    /* position */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* more sizing stuff */
+    padding: 15px;
+    text-align: center;
+
+    /* border color */
+    border: solid 1px var(--color-gray);
+}
+
+.channel {
+    /* flexbox stuff */
+    display: flex;
+    flex-direction: row;
+
+    /* size */
+    height: 200px;
+    width: 100%;
+
+    /* borders */
+    border: solid 1px var(--color-gray);
+    border-top: none;
+}
+
+.channel-infobox {
+    /* sizing and positioning */
+    height: 100%;
+    width: 100px;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+
+    /* colors */
+    border-right: solid 1px var(--color-gray);
+    background-color: var(--color-background-secondary);
+
+    /* flexbox stuff */
+    display: flex;
+    flex-direction: column;
+
+    /* font */
+    font-family: "Fira Sans Light";
+}
+
+.channel-remove {
+    /* position */
+    position: absolute;
+    float: left;
+    left:0px;
+
+    /* cursor */
+    cursor: pointer;
+}
+
+.scrollmenu {
+    /* flexbox */
+    display:flex;
+    flex-direction:column;
+    height: 250px;
+    
+    /* colors */
+    background-color:var(--color-background-secondary);
+    border: solid 1px var(--color-gray);
+    overflow-y: scroll;
+}
+
+.scrollmenu-item {
+    /* sizing */
+    height: 25px;
+    vertical-align: middle;
+
+    /* seperation */
+    border-bottom: solid 1px var(--color-gray);
+
+    /* cursor */
+    cursor: pointer;
+}
+
+.scrollmenu-item:hover {
+    /* hover color */
+    background-color: var(--color-background-tertiary);
+}
+
+input {
+    /* color */
+    background-color: var(--color-background-secondary);
+    border: solid 1px var(--color-gray);
+
+    /* font */
+    font-family: "Fira Sans", sans-serif;
+    color: var(--color-text);
+}
+
+a {
+    /* make links orange */
+    color: var(--color-orange)
+}
+
+ul {
+    /* center list items */
+    display: table;
+    margin: 0 auto;
 }
 
 body {
-    /*color*/
+    /* color */
     background-color: var(--color-background);
     color: var(--color-text);
 

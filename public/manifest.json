@@ -1,0 +1,26 @@
+{
+	"name": "Dawnline",
+	"description": "An online DAW.",
+	"start_url": "/editor/",
+	"display": "standalone",
+	"categories": ["music","utilities"],
+	"theme_color": "rgb(255,153,0)",
+	"icons": [
+		{
+			"src": "/images/logo.png",
+			"type": "image/png",
+			"sizes": "1024x1024"
+		}
+	],
+	"launch_handler": {
+		"client_mode": "focus-existing"
+	},
+	"file_handlers": [
+		{
+			"action": "/editor",
+			"accept": {
+				"application/dawnlineproj": [".dlp"]
+			}
+		}
+	]
+}

@@ -2,10 +2,20 @@
     <head>
         <title>New Project - Dawnline</title>
         <link rel="stylesheet" href="/css/editor.css">
+        <link rel="manifest" href="/manifest.json" />
     </head>
     <body>
-        <div class="menubar">
-            <div class="menubar-item" id="dawnline-logo">
+        <div id="channel-deck"></div>
+        <div id="controlbar">
+            <div class="controlbar-item" id="button-play">
+                <img src="/images/play.svg" width="10">
+            </div>
+            <div class="controlbar-item" id="button-pause">
+                <img src="/images/pause.svg" width="10">
+            </div>
+        </div>
+        <div id="menubar">
+            <div class="menubar-item" id="button-logo">
                 <img src="/images/logo.png" width="65">
             </div>
             <div class="menubar-item" id="button-file">
@@ -17,10 +27,48 @@
             <div class="menubar-item" id="button-view">
                 <p>View</p>
             </div>
+            <div class="menubar-item" id="button-synth" style="display:none;">
+                <p>Synth</p>
+            </div>
         </div>
-        <div id="menu">
-
+        <div id="synth-overlay" style="display:none;">
+            <h3 id="synth-name" style="position: absolute;left:0px;top:0px;height:min-content;cursor:pointer;">New Synth Patch</h3>
         </div>
+        <div id="menu" tabindex=0 style="display:none;"></div>
+        <div id="fade-background" style="display:none;"></div>
+        <div class="window" id="window-about" style="display:none;">
+            <h1>About Dawnline</h1>
+            <p>Dawnline was created by these people:</p>
+            <ul>
+                <li>TurnOffTheTV</li>
+            </ul>
+            <p>Dawnline is open-source on <a href="https://github.com/TurnOffTheTV/dawnline" target="_blank">GitHub</a>!</p>
+        </div>
+        <div class="window" id="window-rename" style="display:none;">
+            <h1>Rename Project</h1>
+            <input id="input-rename" placeholder="New Project">
+            <input type="button" id="button-rename" value="Rename">
+        </div>
+        <div class="window" id="window-renamesynth" style="display:none;">
+            <h1>Rename Synth Patch</h1>
+            <input id="input-renamesynth" placeholder="New Synth Patch">
+            <input type="button" id="button-renamesynth" value="Rename">
+        </div>
+        <div class="window" id="window-addmodule" style="display:none;">
+            <h1>Add Synth Module</h1>
+            <div class="scrollmenu">
+                <span class="scrollmenu-item">Oscillator</span>
+                <span class="scrollmenu-item">MIDI Input</span>
+                <span class="scrollmenu-item">Microphone Input</span>
+                <span class="scrollmenu-item">Sequencer</span>
+                <span class="scrollmenu-item">Gain</span>
+                <span class="scrollmenu-item">Reverb</span>
+                <span class="scrollmenu-item">Delay</span>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/webmidi@latest/dist/iife/webmidi.iife.js"></script>
+        <script src="/js/dlp.js"></script>
+        <script src="/js/synth.js"></script>
         <script src="/js/editor.js"></script>
     </body>
 </html>

@@ -4,9 +4,11 @@ You clicked on this file. That makes it seem like you want to contribute. That's
 
 ## Development
 
-Make all changes on the development branch. When I've decided there's enough new stuff for a new major release, I'll push it onto the main branch (and thus website)
+Make all changes on the development branch. When I've decided there's enough new stuff for a new major release, I'll push it onto the main branch (and thus website). While version 1.0 is being developed though, the website will be synced with the development branch.
 
 When writing code, try to follow the style. Maybe you think it's weird, but it's how I write JavaScript. Also, make sure to comment. You don't need a comment on every line, but each block should be explained.
+
+If you've contributed any code, feel free to add your name to the About window in the editor.
 
 ## Writing Documentation
 
