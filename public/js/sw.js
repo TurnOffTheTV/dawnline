@@ -25,6 +25,7 @@ self.addEventListener("install",function(e){
             "/images/arrow-up.svg",
             "/images/info.svg",
             "/images/logo.png",
+            "/images/midi.svg",
             "/images/pause.svg",
             "/images/pencil.svg",
             "/images/play.svg",

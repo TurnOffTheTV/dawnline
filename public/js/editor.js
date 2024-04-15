@@ -25,6 +25,8 @@ const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext({sampleRate:44100});
 const analyser = audioCtx.createAnalyser();
 
+addEventListener("click",button.rename.focus,{once:true});
+
 //variables for project content
 var projectInfo = {
     name: "New Project"
@@ -39,8 +41,8 @@ var channels = [];
 var patches = [];
 //wether there are any changes
 var changed = false;
-//file worker
-var fileWriter;
+//for file handling
+var fileHandler;
 
 //channel class for above array
 class Channel {
@@ -232,22 +234,26 @@ const fileMenu = [
                 });
 
                 //create file writer
-                fileWriter = await res["0"].createWritable();
+                fileHandler = await res["0"];
             })
         }
     },
     {
         label: "Save",
         image: "arrow-down",
-        click: function(){
-            if(fileWriter){
+        click: async function(){
+            if(fileHandler){
                 //save if we can
+                let fileWriter = await fileHandler.createWritable();
                 fileWriter.write(createDlp({name:projectInfo.name,channels:channels}));
+                fileWriter.close();
             }else{
                 //if we can't, we ask to save
                 window.showSaveFilePicker(dlpFileOpts).then(async function(res){
-                    fileWriter = await res.createWritable();
+                    fileHandler = res;
+                    let fileWriter = await fileHandler.createWritable();
                     fileWriter.write(createDlp({name:projectInfo.name,channels:channels}));
+                    fileWriter.close();
                 });
             }
         }
@@ -255,13 +261,16 @@ const fileMenu = [
     {
         label: "Save As",
         image: "arrow-down",
-        click: function(){
+        click: async function(){
             //ask where to save and reset file writer to there
             window.showSaveFilePicker(dlpFileOpts).then(async function(res){
-                fileWriter = await res.createWritable();
+                fileHandler = res;
+                let fileWriter = await fileHandler.createWritable();
                 //DEBUG
                 console.log(createDlp({name:projectInfo.name,channels:channels}));
                 fileWriter.write(createDlp({name:projectInfo.name,channels:channels}));
+                fileWriter.close();
+                fileWriter = await fileWriter.getWriter();
             });
         }
     },
