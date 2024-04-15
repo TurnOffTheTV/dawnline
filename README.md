@@ -4,7 +4,7 @@
 
 (DAW + online = DAWnline)
 
-An advanced web app for working with audio. Currently a work in progress.
+An advanced, modern web app for working with audio. Currently a work in progress.
 
 With it, you ~~can~~ will be able to
 

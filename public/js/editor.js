@@ -247,10 +247,22 @@ const fileMenu = [
                 //if we can't, we ask to save
                 window.showSaveFilePicker(dlpFileOpts).then(async function(res){
                     fileWriter = await res.createWritable();
-                    console.log(createDlp({name:projectInfo.name,channels:channels}));
                     fileWriter.write(createDlp({name:projectInfo.name,channels:channels}));
                 });
             }
+        }
+    },
+    {
+        label: "Save As",
+        image: "arrow-down",
+        click: function(){
+            //ask where to save and reset file writer to there
+            window.showSaveFilePicker(dlpFileOpts).then(async function(res){
+                fileWriter = await res.createWritable();
+                //DEBUG
+                console.log(createDlp({name:projectInfo.name,channels:channels}));
+                fileWriter.write(createDlp({name:projectInfo.name,channels:channels}));
+            });
         }
     },
     {
@@ -451,3 +463,10 @@ function isDark(){
 addEventListener("beforeunload",function(e){
     if(changed){e.preventDefault();}
 });
+
+//handle when opening files
+if(window.launchQueue){
+    window.launchQueue.setConsumer(function(data){
+        console.dir(data);
+    });
+}

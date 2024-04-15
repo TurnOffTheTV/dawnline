@@ -35,6 +35,6 @@ self.addEventListener("install",function(e){
 });
 
 //send back cache stuff
-self.addEventListener("fetch",function(e){
+/*self.addEventListener("fetch",function(e){
     e.respondWith(caches.match(e.request));
-});
+});*/
