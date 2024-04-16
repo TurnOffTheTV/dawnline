@@ -25,8 +25,6 @@ const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext({sampleRate:44100});
 const analyser = audioCtx.createAnalyser();
 
-addEventListener("click",button.rename.focus,{once:true});
-
 //variables for project content
 var projectInfo = {
     name: "New Project"
@@ -147,7 +145,7 @@ class Patch {
 }
 
 //context menu
-window.addEventListener("contextmenu",function(e){
+addEventListener("contextmenu",function(e){
     e.preventDefault();
 });
 
@@ -218,23 +216,10 @@ const fileMenu = [
         click: function(){
             //show file picker
             window.showOpenFilePicker(dlpFileOpts).then(async function(res){
-                res["0"].getFile().then(async function(file){
-                    changed=true;
-                    //get info from DLP file
-                    let projObj = await parseDlp(file);
-                    projectInfo.name=projObj.name;
-
-                    //set up channels
-                    channels=[];
-                    channelDeck.innerHTML="";
-                    for(var i=0;i<projObj.channels.length;i++){
-                        //TODO: add channels based on file data
-                    }
-                    document.getElementsByTagName("title")[0].innerText=projectInfo.name+" - Dawnline";
-                });
+                res["0"].getFile().then(openFile);
 
                 //create file writer
-                fileHandler = await res["0"];
+                fileHandler = res["0"];
             })
         }
     },
@@ -384,12 +369,6 @@ fadeBackground.addEventListener("click",function(e){
 
 //change menu element for menubar
 {
-        menu.addEventListener("focus",function(e){
-        menu.style.display="flex";
-    });
-    menu.onblur =function(e){
-        menu.style.display="none";
-    }
     menu.addEventListener("click",function(e){
         menu.style.display="none";
     })
@@ -400,7 +379,6 @@ fadeBackground.addEventListener("click",function(e){
     });
     button.logo.addEventListener("click",function(e){
         menu.style.display="flex";
-        menu.focus();
         e.preventDefault();
     });
 
@@ -409,7 +387,6 @@ fadeBackground.addEventListener("click",function(e){
     });
     button.file.addEventListener("click",function(e){
         menu.style.display="flex";
-        menu.focus();
         e.preventDefault();
     });
 
@@ -418,7 +395,6 @@ fadeBackground.addEventListener("click",function(e){
     });
     button.edit.addEventListener("click",function(e){
         menu.style.display="flex";
-        menu.focus();
         e.preventDefault();
     });
 
@@ -427,7 +403,6 @@ fadeBackground.addEventListener("click",function(e){
     });
     button.view.addEventListener("click",function(e){
         menu.style.display="flex";
-        menu.focus();
         e.preventDefault();
     });
 
@@ -436,7 +411,6 @@ fadeBackground.addEventListener("click",function(e){
     });
     button.synth.addEventListener("click",function(e){
         menu.style.display="flex";
-        menu.focus();
         e.preventDefault();
     });
 }
@@ -468,6 +442,21 @@ function isDark(){
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
+async function openFile(file){
+    changed=true;
+    //get info from DLP file
+    let projObj = await parseDlp(file);
+    projectInfo.name=projObj.name;
+
+    //set up channels
+    channels=[];
+    channelDeck.innerHTML="";
+    for(var i=0;i<projObj.channels.length;i++){
+        //TODO: add channels based on file data
+    }
+    document.getElementsByTagName("title")[0].innerText=projectInfo.name+" - Dawnline";
+}
+
 //tell the user if they try to close with unsaved work
 addEventListener("beforeunload",function(e){
     if(changed){e.preventDefault();}
@@ -476,6 +465,7 @@ addEventListener("beforeunload",function(e){
 //handle when opening files
 if(window.launchQueue){
     window.launchQueue.setConsumer(function(data){
-        console.dir(data);
+        fileHandler=data.files[0];
+        data.files[0].getFile().then(openFile)
     });
 }
