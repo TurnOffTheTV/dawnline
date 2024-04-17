@@ -5,15 +5,19 @@ function createDlp(projObj){
     //DEBUG
     console.dir(projObj);
     //create buffer
-    let bytes = new DataView(new ArrayBuffer(projObj.name.length+3));
+    let bytes = new DataView(new ArrayBuffer(projObj.name.length+6));
     let textEncoder = new TextEncoder();
+    //add file identifier
+    bytes.setUint8(0,68);//D
+    bytes.setUint8(1,76);//L
+    bytes.setUint8(2,80);//P
     //set project name
-    bytes.setUint8(0,projObj.name.length);
+    bytes.setUint8(3,projObj.name.length);
     for(var i=0;i<projObj.name.length;i++){
-        bytes.setUint8(i+1,textEncoder.encode(projObj.name)[i]);
+        bytes.setUint8(i+4,textEncoder.encode(projObj.name)[i]);
     }
     //set channel count
-    bytes.setUint16(projObj.name.length+1,projObj.channels.length);
+    bytes.setUint16(projObj.name.length+4,projObj.channels.length);
     //TODO: insert channel and audio data
     return bytes;
 }
@@ -27,10 +31,18 @@ async function parseDlp(blob){
     //turn file into buffer
     let bytes = new DataView(await blob.arrayBuffer());
     console.log(bytes);
-    //read project name
-    projObj.name=textDecoder.decode(bytes).slice(1,bytes.getUint8(0)+1);
-    //get number of channels
-    let numChannels = bytes.getUint16(bytes.getUint8(0)+1);
+    //check if it's a DLP file
+    if(textDecoder.decode(bytes).slice(0,3)!=="DLP"){
+        throw Error("Given file is not a proper DLP file.");
+    }
+    try {
+        //read project name
+        projObj.name=textDecoder.decode(bytes).slice(4,bytes.getUint8(3)+4);
+        //get number of channels
+        let numChannels = bytes.getUint16(bytes.getUint8(0)+4);
+    } catch(err){
+        throw Error("Given file is not a proper DLP file.",{cause:err});
+    }
     //TODO: get channel and audio data
     return projObj;
 }

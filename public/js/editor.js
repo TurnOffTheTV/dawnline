@@ -466,6 +466,6 @@ addEventListener("beforeunload",function(e){
 if(window.launchQueue){
     window.launchQueue.setConsumer(function(data){
         fileHandler=data.files[0];
-        data.files[0].getFile().then(openFile)
+        data.files[0].getFile().then(openFile);
     });
 }
