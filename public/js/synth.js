@@ -49,6 +49,15 @@ class SynthModule {
         this.y=y;
         this.type=type;
         this.node=node;
+        while(true){
+            this.id=10000+Math.floor(Math.random()*90000);
+            for(var i=0;i<modules.length;i++){
+                if(modules[i].id===this.id){break;}
+            }
+            if(i===modules.length){
+                break;
+            }
+        }
     }
 }
 

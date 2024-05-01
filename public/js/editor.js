@@ -49,6 +49,7 @@ class Channel {
         while(true){
             this.id=10000+Math.floor(Math.random()*90000);
             for(var i=0;i<channels.length;i++){
+                if(channels[i].id===this.id){break;}
             }
             if(i===channels.length){
                 break;
@@ -469,3 +470,7 @@ if(window.launchQueue){
         data.files[0].getFile().then(openFile);
     });
 }
+
+addEventListener("copy",function(e){
+    console.log(e);
+})

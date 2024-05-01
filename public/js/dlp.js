@@ -1,5 +1,5 @@
 //dlp.js
-//create and parse Dawnline project files (dlp for DawnLine Project)
+//create and parse Dawnline project files and Dawnline synth patch files
 
 function createDlp(projObj){
     //DEBUG
@@ -45,4 +45,41 @@ async function parseDlp(blob){
     }
     //TODO: get channel and audio data
     return projObj;
+}
+
+function createDlsp(synthObj){
+    //DEBUG
+    console.dir(synthObj);
+    //create buffer
+    let bytes = new DataView(new ArrayBuffer(synthObj.name.length+7));
+    let textEncoder = new TextEncoder();
+    //add file identifier
+    bytes.setUint8(0,68);//D
+    bytes.setUint8(1,76);//L
+    bytes.setUint8(1,53);//S
+    bytes.setUint8(2,80);//P
+    //set patch name
+    bytes.setUint8(4,synthObj.name.length);
+    for(var i=0;i<synthObj.name.length;i++){
+        bytes.setUint8(i+5,textEncoder.encode(projObj.name)[i]);
+    }
+    //set module count
+    bytes.setUint16(synthObj.name.length+5,synthObj.modules.length);
+    //TODO: insert module data
+    return bytes;
+}
+
+async function parseDlsp(blob){
+    let synthObj = {
+        name:"New Project",
+        modules:[]
+    };
+    let textDecoder = new TextDecoder();
+    //turn file into buffer
+    let bytes = new DataView(await blob.arrayBuffer());
+    console.log(bytes);
+    //check if it's a DLSP file
+    if(textDecoder.decode(bytes).slice(0,4)!=="DLSP"){
+        throw Error("Given file is not a proper DLSP file.");
+    }
 }
