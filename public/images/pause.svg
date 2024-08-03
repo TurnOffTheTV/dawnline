@@ -1,8 +1,8 @@
-<svg version="1.1" width="10" height="10" xmlns="http://www.w3.org/2000/svg">
+<svg version="1.1" width="50" height="50" xmlns="http://www.w3.org/2000/svg">
     <style>
         line {
             stroke: black;
-            stroke-width: 1px;
+            stroke-width: 2.5px;
             stroke-linecap: round;
         }
         @media (prefers-color-scheme: dark) {
@@ -11,6 +11,6 @@
             }
         }
     </style>
-    <line x1="2.5" x2="2.5" y1="2.5" y2="7.5"/>
-    <line x1="7.5" x2="7.5" y1="2.5" y2="7.5"/>
+    <line x1="12.5" x2="12.5" y1="12.5" y2="37.5"/>
+    <line x1="37.5" x2="37.5" y1="12.5" y2="37.5"/>
 </svg>

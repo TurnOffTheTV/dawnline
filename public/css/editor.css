@@ -1,6 +1,3 @@
-/* load font */
-/*@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');*/
-
 @font-face {
     font-family: "Fira Sans";
     src: url("/fonts/fira.ttf") format("truetype");
@@ -17,47 +14,51 @@
     --color-gray: rgb(102,102,102);
 
     /* basic colors */
-    --color-background: white;
+    --color-background: rgb(255,255,255);
     --color-background-secondary: rgb(225,225,225);
     --color-background-tertiary: rgb(200,200,200);
-    --color-text: black;
+    --color-text: rgb(0,0,0);
 
     /* colors for dark mode */
     @media (prefers-color-scheme: dark) {
         --color-background: rgb(50,50,50);
         --color-background-secondary: rgb(75,75,75);
         --color-background-tertiary: rgb(100,100,100);
-        --color-text: white;
+        --color-text: rgb(255,255,255);
     }
 
     /* prevent highlighting text */
     user-select: none;
+    -webkit-user-select: none;
 }
 
-#menubar {
-    /* position and size */
-    position: fixed;
-    left: 0px;
-    top: 0px;
+#topbar {
+    height: 25px;
     width: 100%;
-    height: 75px;
-
-    /* more sizing stuff */
-    margin: 0px;
-    padding: 5px;
-
-    /* colors */
-    border-bottom: solid 1px var(--color-gray);
-    background-color: var(--color-background);
-
-    /* flexbox */
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
+    border-bottom: 1px var(--color-gray) solid;
 }
 
-#fade-background {
-    /* the all-important faded background of the fade background */
+#controlbar {
+    height: 50px;
+    width: 100%;
+    border-bottom: 1px var(--color-gray) solid;
+}
+
+#modulebar {
+    height: 25px;
+    width: 100%;
+    border-bottom: 1px var(--color-gray) solid;
+}
+
+#channel-deck {
+    width: 100%;
+    height: calc(100% - 75px);
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+}
+
+#window-background {
     background-color: rgba(255,255,255,0.75);
 
     @media (prefers-color-scheme: dark) {
@@ -70,143 +71,16 @@
     top:0px;
     width:100%;
     height:100%;
+
+    z-index: 1;
 }
 
-#menu {
-    /* position and size */
-    width: 300px;
-    position: absolute;
-
-    /* border */
-    border: solid 1px var(--color-gray);
+#context-menu {
+    background: var(--color-background-secondary);
+    border: 1px var(--color-gray) solid;
     border-bottom: none;
-
-    /* displaying */
-    background-color: var(--color-background-secondary);
-    flex-direction: column;
-}
-
-#controlbar {
-    /* position and size */
+    min-width: 100px;
     position: fixed;
-    left: 0px;
-    top: 85px;
-    width: 100%;
-    height: 15px;
-
-    /* more sizing stuff */
-    margin: 0px;
-    padding: 0px;
-    padding-left: 85px;
-
-    /* colors */
-    border-bottom: solid 1px var(--color-gray);
-    background-color: var(--color-background);
-
-    /* flexbox */
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-}
-
-#channel-deck {
-
-    /* position and size */
-    position:absolute;
-    top: 100px;
-    left:0px;
-    width:100%;
-    margin: 0px;
-    padding: 0px;
-
-    /* flexbox setup */
-    display: flex;
-    flex-direction: column;
-    
-    /* scrolling */
-    overflow-y: scroll;
-}
-
-#synth-overlay {
-    /* positioning and size */
-    position: fixed;
-    left:0px;
-    top:101px;
-    width:100%;
-    height:calc(100% - 100px);
-}
-
-.menu-item {
-    /* size */
-    width: 100%;
-    height: 50px;
-
-    /* display */
-    display: flex;
-    flex-direction: row;
-
-    /* border */
-    border-bottom: solid 1px var(--color-gray);
-
-    /* more sizing stuff */
-    padding: 5px;
-
-    /* color */
-    background-color: var(--color-background-secondary);
-
-    /* cursor */
-    cursor: pointer;
-}
-
-.menu-item:hover {
-    /* hover color */
-    background-color: var(--color-background-tertiary);
-}
-
-.menubar-item {
-    /* size */
-    width: 65px;
-    height: 65px;
-
-    /* more sizing stuff */
-    margin: 5px;
-    padding: auto;
-
-    /* set positioning */
-    text-align: center;
-    vertical-align: middle;
-    align-content: center;
-
-    /* font */
-    font-family: "Fira Sans Light";
-
-    /* cursor */
-    cursor: pointer;
-}
-
-.menubar-item:hover {
-    /* hover color */
-    background-color: var(--color-background-secondary);
-}
-
-.controlbar-item {
-    /* size */
-    width: 15px;
-    height: 15px;
-
-    /* more sizing stuff */
-    margin: 0px;
-    padding: auto;
-    text-align: center;
-    align-content: center;
-
-    /* cursor */
-    cursor: pointer;
-}
-
-.controlbar-item:hover {
-    /* hover color */
-    background-color: var(--color-orange);
 }
 
 .window {
@@ -225,84 +99,151 @@
 
     /* border color */
     border: solid 1px var(--color-gray);
+
+    z-index: 2;
+}
+
+.topbar-item {
+    height: 25px;
+    line-height: 25px;
+    font-size: 15px;
+    font-family: "Fira Sans Light", sans-serif;
+    margin: 0px;
+    outline: 0px;
+    border: 0px;
+    padding: 0 5px;
+}
+
+.topbar-item:hover {
+    background-color: var(--color-background-secondary);
+}
+
+.topbar-item:active {
+    background-color: var(--color-orange);
+}
+
+.controlbar-item {
+    height: 50px;
+    line-height: 50px;
+    margin: 0px;
+    outline: 0px;
+    border: 0px;
+    padding: 0px;
+}
+
+.controlbar-item:hover {
+    background-color: var(--color-background-secondary);
+}
+
+.controlbar-item:active {
+    background-color: var(--color-orange);
 }
 
 .channel {
-    /* flexbox stuff */
+    width: 100%;
+    height: 150px;
+    border-bottom: 1px var(--color-gray) solid;
     display: flex;
     flex-direction: row;
-
-    /* size */
-    height: 200px;
-    width: 100%;
-
-    /* borders */
-    border: solid 1px var(--color-gray);
-    border-top: none;
 }
 
-.channel-infobox {
-    /* sizing and positioning */
+.channel-info-panel {
+    width: 150px;
     height: 100%;
-    width: 100px;
-    padding-left: 10px;
-    padding-right: 10px;
     text-align: center;
-
-    /* colors */
-    border-right: solid 1px var(--color-gray);
-    background-color: var(--color-background-secondary);
-
-    /* flexbox stuff */
+    background: var(--color-background-secondary);
+    border-right: 1px var(--color-gray) solid;
     display: flex;
     flex-direction: column;
-
-    /* font */
-    font-family: "Fira Sans Light";
+    align-items: center;
+    padding: 0px;
 }
 
-.channel-remove {
-    /* position */
+.pan-slider {
+    appearance: none;
+    border-radius: 5px;
+    outline: none;
+    width: 125px;
+    height: 10px;
+    align-items: center;
+    background-color: var(--color-background-tertiary);
+}
+
+.pan-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    background: var(--color-orange);
+    outline: none;
+    cursor: ew-resize;
+}
+
+.pan-slider::-moz-range-thumb {
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    background: var(--color-orange);
+    outline: none;
+    cursor: ew-resize;
+}
+
+.channel-delete {
     position: absolute;
     float: left;
-    left:0px;
-
-    /* cursor */
-    cursor: pointer;
+    left: 0px;
+    width: 20px;
+    height: 20px;
+    cursor: hand;
+    background-image: url("/images/remove.svg");
 }
 
-.scrollmenu {
-    /* flexbox */
-    display:flex;
-    flex-direction:column;
-    height: 250px;
+.settings-item {
+    height: 45px;
+    line-height: 45px;
+    padding: 5px;
+    align-items: center;
     
-    /* colors */
-    background-color:var(--color-background-secondary);
-    border: solid 1px var(--color-gray);
-    overflow-y: scroll;
 }
 
-.scrollmenu-item {
-    /* sizing */
-    height: 25px;
-    vertical-align: middle;
-
-    /* seperation */
-    border-bottom: solid 1px var(--color-gray);
-
-    /* cursor */
-    cursor: pointer;
+.context-item {
+    height:25px;
+    line-height: 25px;
+    font-size: 15px;
+    margin: 0px;
+    outline: 0px;
+    border: 0px;
+    border-bottom: 1px var(--color-gray) solid;
+    padding: 0 5px;
 }
 
-.scrollmenu-item:hover {
-    /* hover color */
-    background-color: var(--color-background-tertiary);
+.context-item:hover {
+    background: var(--color-background-tertiary);
+}
+
+.context-item:active {
+    background-color: var(--color-orange);
+}
+
+.bar {
+    display: flex;
+    margin: 0px;
+    outline: 0px;
+    border: 0px;
+    padding: 0px;
+}
+.h {
+    flex-direction: row;
+}
+.v {
+    flex-direction: column;
 }
 
 input {
     /* color */
     background-color: var(--color-background-secondary);
+    accent-color: var(--color-orange);
     border: solid 1px var(--color-gray);
 
     /* font */
@@ -316,7 +257,7 @@ a {
 }
 
 ul {
-    /* center list items */
+    /* center list items (about window fix)*/
     display: table;
     margin: 0 auto;
 }
@@ -328,4 +269,9 @@ body {
 
     /* font */
     font-family: "Fira Sans", sans-serif;
+
+    margin: 0px;
+    outline: 0px;
+    border: 0px;
+    padding: 0px;
 }

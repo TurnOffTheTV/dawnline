@@ -31,6 +31,27 @@
     }
 }
 
+#sidebar {
+    width: 25%;
+    height: 100%;
+    left: calc(-25% + 50px);
+    top: 0px;
+    position: fixed;
+    background: var(--color-background-secondary);
+    border-right: 1px var(--color-gray) solid;
+    padding: 10px;
+}
+#sidebar:hover {
+    animation: sidebar 0.5s both;
+    animation-direction: alternate;
+}
+#sidebar:
+
+@keyframes sidebar {
+    from {left: calc(-25% + 50px);}
+    to {left: 0px;}
+}
+
 .main-info {
     /* sizing stuff */
     width: 50%;

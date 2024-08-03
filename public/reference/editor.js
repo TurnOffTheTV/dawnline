@@ -221,7 +221,7 @@ const fileMenu = [
 
                 //create file writer
                 fileHandler = res["0"];
-            })
+            });
         }
     },
     {
@@ -473,4 +473,4 @@ if(window.launchQueue){
 
 addEventListener("copy",function(e){
     console.log(e);
-})
+});
