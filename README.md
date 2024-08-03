@@ -14,4 +14,4 @@ With it, you ~~can~~ will be able to
 
 ## Contributing
 
-If you want to help with the project, wether that be coding, writing documentation, testing and debugging, or just giving some ideas, look in the [contributing](contributing/INFO.md) folder
+If you want to help with the project, wether that be coding, writing documentation, testing and debugging, or just giving some ideas, look at the Contributing page in the wiki.
