@@ -3,40 +3,66 @@
         <title>New Project - Dawnline</title>
         <link rel="stylesheet" href="/css/editor.css">
         <link rel="manifest" href="/manifest.json" />
+        <datalist id="pan-marker">
+            <option value="0"></option>
+          </datalist>
     </head>
     <body>
-        <div id="channel-deck"></div>
-        <div id="controlbar">
-            <div class="controlbar-item" id="button-play">
-                <img src="/images/play.svg" width="10">
+        <div id="topbar" class="h bar">
+            <div id="topbar-logo" class="topbar-item">
+                <img src="/images/logo.png" width="25">
             </div>
-            <div class="controlbar-item" id="button-pause">
-                <img src="/images/pause.svg" width="10">
+            <div id="topbar-file" class="topbar-item">
+                File
             </div>
-        </div>
-        <div id="menubar">
-            <div class="menubar-item" id="button-logo">
-                <img src="/images/logo.png" width="65">
+            <div id="topbar-edit" class="topbar-item">
+                Edit
             </div>
-            <div class="menubar-item" id="button-file">
-                <p>File</p>
+            <div id="topbar-view" class="topbar-item">
+                View
             </div>
-            <div class="menubar-item" id="button-edit">
-                <p>Edit</p>
-            </div>
-            <div class="menubar-item" id="button-view">
-                <p>View</p>
-            </div>
-            <div class="menubar-item" id="button-synth" style="display:none;">
-                <p>Synth</p>
+            <div id="topbar-debug" class="topbar-item" style="display:none;">
+                Debug
             </div>
         </div>
-        <div id="synth-overlay" style="display:none;">
-            <h3 id="synth-name" style="position: absolute;left:0px;top:0px;height:min-content;cursor:pointer;">New Synth Patch</h3>
+        <div id="channel-view" class="view">
+            <div id="controlbar" class="h bar">
+                <div id="controlbar-play" class="controlbar-item"><img src="/images/play.svg"></div>
+                <div id="controlbar-pause" class="controlbar-item" style="display:none;"><img src="/images/pause.svg"></div>
+            </div>
+            <div id="channel-deck"></div>
         </div>
-        <div id="menu" tabindex=0 style="display:none;"></div>
-        <div id="fade-background" style="display:none;"></div>
-        <div class="window" id="window-about" style="display:none;">
+        <div id="synth-view" class="view" style="display:none">
+            <div id="modulebar" class="h bar">
+                <div id="modulebar-generator" class="topbar-item">Generators</div>
+                <div id="modulebar-basics" class="topbar-item">Basics</div>
+            </div>
+            <canvas id="synth-canvas"></canvas>
+        </div>
+        <div id="window-background" style="display:none;"></div>
+        <div id="window-rename-project" class="window" style="display:none;">
+            <h1>Rename Project</h1>
+            <input id="input-rename-project" placeholder="New Project">
+            <input type="button" id="button-rename-project" value="Rename">
+        </div>
+        <div id="window-unavailable" class="window" style="display:none;">
+            <h1>Dawnline Unavailable</h1>
+            <p>You can't use Dawnline in this browser because it doesn't support the Web Audio API. Try updating or use a different browser.</p>
+        </div>
+        <div id="window-program-settings" class="window" style="display:none;">
+            <h1>Dawnline Settings</h1>
+            <div class="v bar" style="border:1px var(--color-gray) solid;background:var(--color-background-secondary);">
+                <div class="settings-item">
+                    <input id="input-sample-rate" type="number" min="8000" max="96000" step="1">
+                    <label for="input-sample-rate">Default Sample Rate</label>
+                </div>
+                <div class="settings-item">
+                    <input id="input-debug-menu" type="checkbox">
+                    <label for="input-debug-menu">Debug Menu</label>
+                </div>
+            </div>
+        </div>
+        <div id="window-about" class="window" style="display:none;">
             <h1>About Dawnline</h1>
             <p>Dawnline was created by these people:</p>
             <ul>
@@ -44,31 +70,7 @@
             </ul>
             <p>Dawnline is open-source on <a href="https://github.com/TurnOffTheTV/dawnline" target="_blank">GitHub</a>!</p>
         </div>
-        <div class="window" id="window-rename" style="display:none;">
-            <h1>Rename Project</h1>
-            <input id="input-rename" placeholder="New Project">
-            <input type="button" id="button-rename" value="Rename">
-        </div>
-        <div class="window" id="window-renamesynth" style="display:none;">
-            <h1>Rename Synth Patch</h1>
-            <input id="input-renamesynth" placeholder="New Synth Patch">
-            <input type="button" id="button-renamesynth" value="Rename">
-        </div>
-        <div class="window" id="window-addmodule" style="display:none;">
-            <h1>Add Synth Module</h1>
-            <div class="scrollmenu">
-                <span class="scrollmenu-item">Oscillator</span>
-                <span class="scrollmenu-item">MIDI Input</span>
-                <span class="scrollmenu-item">Microphone Input</span>
-                <span class="scrollmenu-item">Sequencer</span>
-                <span class="scrollmenu-item">Gain</span>
-                <span class="scrollmenu-item">Reverb</span>
-                <span class="scrollmenu-item">Delay</span>
-            </div>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/webmidi@latest/dist/iife/webmidi.iife.js"></script>
-        <script src="/js/dlp.js"></script>
-        <script src="/js/synth.js"></script>
-        <script src="/js/editor.js"></script>
+        <div id="context-menu" style="display:none;"></div>
+        <script src="/js/editor.mjs" type="module"></script>
     </body>
 </html>

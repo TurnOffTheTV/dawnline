@@ -17,9 +17,9 @@
 	},
 	"file_handlers": [
 		{
-			"action": "/editor",
+			"action": "./editor/",
 			"accept": {
-				"application/dawnlineproj": [".dlp"]
+				"application/dlp": [".dlp"]
 			}
 		}
 	]

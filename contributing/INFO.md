@@ -16,7 +16,7 @@ There's not a lot to this app at this point, but eventually there will be, and w
 
 ## Testing
 
-You can test the [development version](dev.dawnline.turnoffthetv.xyz) or the [main version](dawnline.turnoffthetv.xyz). If you find any issues, add them to... well, the Issues tab.
+You can test the [development version](https://dev.dawnline.turnoffthetv.xyz) or the [main version](https://dawnline.turnoffthetv.xyz). If you find any issues, add them to... well, the Issues tab.
 
 ## Ideas
 
