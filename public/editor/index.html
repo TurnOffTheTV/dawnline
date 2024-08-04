@@ -1,76 +1,73 @@
 <html>
-    <head>
-        <title>New Project - Dawnline</title>
-        <link rel="stylesheet" href="/css/editor.css">
-        <link rel="manifest" href="/manifest.json" />
-        <datalist id="pan-marker">
-            <option value="0"></option>
-          </datalist>
-    </head>
-    <body>
-        <div id="topbar" class="h bar">
-            <div id="topbar-logo" class="topbar-item">
-                <img src="/images/logo.png" width="25">
-            </div>
-            <div id="topbar-file" class="topbar-item">
-                File
-            </div>
-            <div id="topbar-edit" class="topbar-item">
-                Edit
-            </div>
-            <div id="topbar-view" class="topbar-item">
-                View
-            </div>
-            <div id="topbar-debug" class="topbar-item" style="display:none;">
-                Debug
-            </div>
-        </div>
-        <div id="channel-view" class="view">
-            <div id="controlbar" class="h bar">
-                <div id="controlbar-play" class="controlbar-item"><img src="/images/play.svg"></div>
-                <div id="controlbar-pause" class="controlbar-item" style="display:none;"><img src="/images/pause.svg"></div>
-            </div>
-            <div id="channel-deck"></div>
-        </div>
-        <div id="synth-view" class="view" style="display:none">
-            <div id="modulebar" class="h bar">
-                <div id="modulebar-generator" class="topbar-item">Generators</div>
-                <div id="modulebar-basics" class="topbar-item">Basics</div>
-            </div>
-            <canvas id="synth-canvas"></canvas>
-        </div>
-        <div id="window-background" style="display:none;"></div>
-        <div id="window-rename-project" class="window" style="display:none;">
-            <h1>Rename Project</h1>
-            <input id="input-rename-project" placeholder="New Project">
-            <input type="button" id="button-rename-project" value="Rename">
-        </div>
-        <div id="window-unavailable" class="window" style="display:none;">
-            <h1>Dawnline Unavailable</h1>
-            <p>You can't use Dawnline in this browser because it doesn't support the Web Audio API. Try updating or use a different browser.</p>
-        </div>
-        <div id="window-program-settings" class="window" style="display:none;">
-            <h1>Dawnline Settings</h1>
-            <div class="v bar" style="border:1px var(--color-gray) solid;background:var(--color-background-secondary);">
-                <div class="settings-item">
-                    <input id="input-sample-rate" type="number" min="8000" max="96000" step="1">
-                    <label for="input-sample-rate">Default Sample Rate</label>
-                </div>
-                <div class="settings-item">
-                    <input id="input-debug-menu" type="checkbox">
-                    <label for="input-debug-menu">Debug Menu</label>
-                </div>
-            </div>
-        </div>
-        <div id="window-about" class="window" style="display:none;">
-            <h1>About Dawnline</h1>
-            <p>Dawnline was created by these people:</p>
-            <ul>
-                <li>TurnOffTheTV</li>
-            </ul>
-            <p>Dawnline is open-source on <a href="https://github.com/TurnOffTheTV/dawnline" target="_blank">GitHub</a>!</p>
-        </div>
-        <div id="context-menu" style="display:none;"></div>
-        <script src="/js/editor.mjs" type="module"></script>
-    </body>
+	<head>
+		<title>New Project - Dawnline</title>
+		<link rel="stylesheet" href="/css/editor.css">
+		<link rel="manifest" href="/manifest.json" />
+		<datalist id="pan-marker">
+			<option value="0"></option>
+		  </datalist>
+	</head>
+	<body>
+		<div id="topbar" class="h bar">
+			<div id="topbar-logo" class="topbar-item">
+				<img src="/images/logo.png" width="25">
+			</div>
+			<div id="topbar-file" class="topbar-item">
+				File
+			</div>
+			<div id="topbar-edit" class="topbar-item">
+				Edit
+			</div>
+			<div id="topbar-view" class="topbar-item">
+				View
+			</div>
+		</div>
+		<div id="channel-view" class="view">
+			<div id="controlbar" class="h bar">
+				<div id="controlbar-play" class="controlbar-item"><img src="/images/play.svg"></div>
+				<div id="controlbar-pause" class="controlbar-item" style="display:none;"><img src="/images/pause.svg"></div>
+			</div>
+			<div id="channel-deck"></div>
+		</div>
+		<div id="synth-view" class="view" style="display:none">
+			<div id="patchbar" class="h bar">
+				<div id="patchbar-patches" class="topbar-item">Patches</div>
+				<div id="patchbar-file" class="topbar-item" aria-disabled>File</div>
+				<div id="patchbar-generators" class="topbar-item" aria-disabled>Generators</div>
+				<div id="patchbar-basics" class="topbar-item" aria-disabled>Basics</div>
+			</div>
+			<div style="height:100%;width:100%;">
+				<canvas id="synth-canvas"></canvas>
+			</div>
+		</div>
+		<div id="window-background" style="display:none;"></div>
+		<div id="window-rename-project" class="window" style="display:none;">
+			<h1>Rename Project</h1>
+			<input id="input-rename-project" placeholder="New Project">
+			<input type="button" id="button-rename-project" value="Rename">
+		</div>
+		<div id="window-unavailable" class="window" style="display:none;">
+			<h1>Dawnline Unavailable</h1>
+			<p>You can't use Dawnline in this browser because it doesn't support the Web Audio API. Try updating or use a different browser.</p>
+		</div>
+		<div id="window-program-settings" class="window" style="display:none;">
+			<h1>Dawnline Settings</h1>
+			<div class="v bar" style="border:1px var(--color-gray) solid;background:var(--color-background-secondary);">
+				<div class="settings-item">
+					<input id="input-sample-rate" type="number" min="8000" max="96000" step="1">
+					<label for="input-sample-rate">Default Sample Rate</label>
+				</div>
+			</div>
+		</div>
+		<div id="window-about" class="window" style="display:none;">
+			<h1>About Dawnline</h1>
+			<p>Dawnline was created by these people:</p>
+			<ul>
+				<li>TurnOffTheTV</li>
+			</ul>
+			<p>Dawnline is open-source on <a href="https://github.com/TurnOffTheTV/dawnline" target="_blank">GitHub</a>!</p>
+		</div>
+		<div id="context-menu" style="display:none;"></div>
+		<script src="/js/env.mjs" type="module"></script>
+	</body>
 </html>
