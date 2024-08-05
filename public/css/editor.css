@@ -130,11 +130,11 @@
 	background-color: var(--color-orange);
 }
 
-.topbar-item[aria-disabled] {
+.topbar-item[disabled] {
 	color: var(--color-text-disabled);
 }
 
-.topbar-item[aria-disabled]:hover {
+.topbar-item[disabled]:hover {
 	background: none;
 }
 
@@ -252,10 +252,14 @@
 	background-color: var(--color-orange);
 }
 
-.context-item[aria-disabled] {
+.context-item[disabled] {
 	color: var(--color-text-disabled);
 	font-style: italic;
 	background: none;
+}
+
+.context-item[highlighted] {
+	background-color: var(--color-background-tertiary);
 }
 
 .bar {

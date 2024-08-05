@@ -9,6 +9,7 @@ function setSize(){
 	synthCanvas.height=synthCanvas.getBoundingClientRect().height;
 	width=synthCanvas.width;
 	height=synthCanvas.height;
+	draw();
 }
 
 window.addEventListener("resize",setSize);
@@ -19,12 +20,12 @@ export var currentPatch;
 
 export function setCurrentPatch(patch){
 	currentPatch=patch;
+	draw();
 }
 
 export function load(){
 	loaded=true;
 	setSize();
-	draw();
 }
 
 export function unload(){
@@ -33,18 +34,15 @@ export function unload(){
 
 let rot = 0;
 function draw(){
-	rot+=0.03;
-	c.resetTransform();
 	c.font='50px "Fira Sans"';
 	c.textAlign="center";
 	c.textBaseline="middle";
 	c.fillStyle="black";
 	c.fillRect(0,0,width,height);
-	c.translate(width/2,height/2);
-	c.rotate(rot);
 	c.fillStyle="white";
-	c.fillText("MODULAR SYNTH",0,0);
-	if(loaded){requestAnimationFrame(draw);}
+	if(currentPatch){
+		c.fillText(currentPatch.name,width/2,height/2);
+	}else{
+		c.fillText("MODULAR SYNTH",width/2,height/2);
+	}
 }
-
-draw();

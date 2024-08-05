@@ -3,6 +3,7 @@
 
 //import modules
 import * as DLP from "./dlp.mjs"
+import * as DLSP from "./dlsp.mjs"
 import * as synth from "./synth.mjs"
 
 //get settings
@@ -51,6 +52,7 @@ const patchbar = {
 	items:[],
 	el: document.getElementById("patchbar"),
 	patches: document.getElementById("patchbar-patches"),
+	file: document.getElementById("patchbar-file"),
 	generators: document.getElementById("patchbar-generators"),
 	basics: document.getElementById("patchbar-basics")
 };
@@ -76,7 +78,7 @@ if(!AudioContext){
 var a = new AudioContext({sampleRate:settings.sampleRate});
 
 //file management
-var fileHandler;
+var dlpFileHandler;
 
 //project
 export var project = {
@@ -107,6 +109,7 @@ class Channel {
 
 		this.element = document.createElement("div");
 		this.element.className="channel";
+		this.element.dataset.id=this.id;
 		let channelInfoEl = document.createElement("div");
 		channelInfoEl.className="channel-info-panel";
 		channelInfoEl.innerHTML="<h4>"+this.name+"</h4>";
@@ -129,17 +132,18 @@ class Channel {
 		channelInfoEl.appendChild(this.panSlider);
 		let removeButton = document.createElement("div");
 		removeButton.className="channel-delete";
-		removeButton.onclick =function(){
-			if(confirm("Do you really want to delete "+this.name)){
+		removeButton.addEventListener("click",function(){
+			console.log(this.parentElement.parentElement.dataset.id);
 				for(let i=0;i<project.channels.length;i++){
-					if(project.channels[i].id===this.id){
-						this.element.remove();
-						project.channels.splice(i,1);
-						break;
-					}
+					if(project.channels[i].id==this.parentElement.parentElement.dataset.id){
+						if(confirm("Do you really want to delete "+project.channels[i].name+"?")){
+							project.channels[i].element.remove();
+							project.channels.splice(i,1);
+						}
+					break;
 				}
 			}
-		};
+		});
 		channelInfoEl.appendChild(removeButton);
 		this.element.appendChild(channelInfoEl);
 		this.waveArea = document.createElement("div");
@@ -154,14 +158,29 @@ class Channel {
 
 class SynthPatch {
 	modules=[];
+	id;
 	name;
-	constructor(){
-		this.name="patch-"+project.patches.length;
+	fileHandler;
+	constructor(patch){
+		if(patch){
+			this.id=patch.patch.id;
+			this.name=patch.patch.name;
+		}else{
+			while(true){
+				this.id=10000+Math.floor(Math.random()*90000);
+				for(var i=0;i<project.patches.length;i++){
+					if(project.patches[i].id===this.id){break;}
+				}
+				if(i===project.patches.length){
+					break;
+				}
+			}
+			this.name="patch-"+project.patches.length;
+		}
 	}
 }
 
 async function openFile(file){
-	changed=true;
 	//get info from DLP file
 	let proj = await DLP.parse(file);
 	project = proj.proj;
@@ -205,6 +224,11 @@ function setAddonMenu(e){
 	}
 	contextMenu.style.left=e.target.getBoundingClientRect().x;
 	contextMenu.style.top=e.target.getBoundingClientRect().bottom;
+}
+
+function enableSynthMenus(){
+	patchbar.generators.removeAttribute("disabled");
+	patchbar.basics.removeAttribute("disabled");
 }
 
 input.sampleRate.value=settings.sampleRate;
@@ -270,7 +294,7 @@ topbar.file.addEventListener("mouseover",function(){
 	newItem.innerText="New";
 	newItem.className="context-item";
 	newItem.addEventListener("click",function(){
-		fileHandler=undefined;
+		dlpFileHandler=undefined;
 		changed=false;
 		project={
 			name: "New Project",
@@ -291,7 +315,7 @@ topbar.file.addEventListener("mouseover",function(){
 		window.showOpenFilePicker(DLP.fileOpts).then(async function(res){
 			res["0"].getFile().then(openFile);
 
-			fileHandler = res["0"];
+			dlpFileHandler = res["0"];
 		});
 	});
 	contextMenu.appendChild(openItem);
@@ -300,14 +324,16 @@ topbar.file.addEventListener("mouseover",function(){
 	saveItem.innerText="Save";
 	saveItem.className="context-item";
 	saveItem.addEventListener("click",async function(){
-		if(fileHandler){
-			let fileWriter = await fileHandler.createWritable();
+		if(dlpFileHandler){
+			let fileWriter = await dlpFileHandler.createWritable();
 			fileWriter.write(DLP.create(project));
 			fileWriter.close();
 		}else{
-			window.showSaveFilePicker(DLP.fileOpts).then(async function(res){
-				fileHandler = res;
-				let fileWriter = await fileHandler.createWritable();
+			let fileOpts = DLP.fileOpts;
+			fileOpts.suggestedName=project.name+".dlp";
+			window.showSaveFilePicker(fileOpts).then(async function(res){
+				dlpFileHandler = res;
+				let fileWriter = await dlpFileHandler.createWritable();
 				fileWriter.write(DLP.create(project));
 				fileWriter.close();
 			});
@@ -319,10 +345,12 @@ topbar.file.addEventListener("mouseover",function(){
 	saveAsItem.innerText="Save As";
 	saveAsItem.className="context-item";
 	saveAsItem.addEventListener("click",async function(){
+		let fileOpts = DLP.fileOpts;
+		fileOpts.suggestedName=project.name+".dlp";
 		//ask where to save and reset file writer to there
-		window.showSaveFilePicker(DLP.fileOpts).then(async function(res){
-			fileHandler = res;
-			let fileWriter = await fileHandler.createWritable();
+		window.showSaveFilePicker(fileOpts).then(async function(res){
+			dlpFileHandler = res;
+			let fileWriter = await dlpFileHandler.createWritable();
 			//DEBUG
 			console.log(DLP.create(project));
 			fileWriter.write(DLP.create(project));
@@ -383,6 +411,7 @@ topbar.edit.addEventListener("mouseover",function(){
 		newSynthItem.addEventListener("click",function(){
 			project.patches.push(new SynthPatch());
 			synth.setCurrentPatch(project.patches[project.patches.length-1]);
+			enableSynthMenus();
 		});
 		contextMenu.appendChild(newSynthItem);
 	}
@@ -458,9 +487,14 @@ patchbar.patches.addEventListener("mouseover",function(){
 		let patchItem = document.createElement("div");
 		patchItem.innerText=project.patches[i].name;
 		patchItem.className="context-item";
-		patchItem.addEventListener("click",function(index){
-			synth.setCurrentPatch(project.patches[index]);
-		},i);
+		patchItem.dataset.index=i;
+		if(synth.currentPatch.name===project.patches[i].name){
+			patchItem.toggleAttribute("highlighted",true);
+		}
+		patchItem.addEventListener("click",function(e){
+			synth.setCurrentPatch(project.patches[this.dataset.index]);
+			enableSynthMenus();
+		});
 		contextMenu.appendChild(patchItem);
 	}
 
@@ -468,15 +502,86 @@ patchbar.patches.addEventListener("mouseover",function(){
 		let patchItem = document.createElement("div");
 		patchItem.innerText="There are no synth patches";
 		patchItem.className="context-item";
-		patchItem.ariaDisabled=true;
+		patchItem.toggleAttribute("disabled",true);
 		contextMenu.appendChild(patchItem);
 	}
 
 	contextMenu.style.left=patchbar.patches.getBoundingClientRect().x;
 	contextMenu.style.top=patchbar.patches.getBoundingClientRect().bottom;
 });
+patchbar.file.addEventListener("mouseover",function(){
+	contextMenu.innerHTML="";
+
+	let openItem = document.createElement("div");
+	openItem.innerText="Open";
+	openItem.className="context-item";
+	openItem.addEventListener("click",function(){
+		window.showOpenFilePicker(DLSP.fileOpts).then(async function(res){
+			let patch = await DLSP.parse(await res["0"].getFile());
+			project.patches.push(new SynthPatch(patch));
+			synth.setCurrentPatch(project.patches[project.patches.length-1]);
+			synth.currentPatch.fileHandler=res["0"];
+		});
+	});
+	contextMenu.appendChild(openItem);
+	
+	if(synth.currentPatch){
+		let saveItem = document.createElement("div");
+		saveItem.innerText="Save";
+		saveItem.className="context-item";
+		saveItem.addEventListener("click",async function(){
+			if(synth.currentPatch.fileHandler){
+				let fileWriter = await synth.currentPatch.fileHandler.createWritable();
+				fileWriter.write(DLSP.create(synth.currentPatch));
+				fileWriter.close();
+			}else{
+				let fileOpts = DLSP.fileOpts;
+				fileOpts.suggestedName=synth.currentPatch.name+".dlsp";
+				window.showSaveFilePicker(fileOpts).then(async function(res){
+					synth.currentPatch.fileHandler = res;
+					let fileWriter = await synth.currentPatch.fileHandler.createWritable();
+					fileWriter.write(DLSP.create(synth.currentPatch));
+					fileWriter.close();
+				});
+			}
+		});
+		contextMenu.appendChild(saveItem);
+
+		let saveAsItem = document.createElement("div");
+		saveAsItem.innerText="Save As";
+		saveAsItem.className="context-item";
+		saveAsItem.addEventListener("click",function(){
+			let fileOpts = DLSP.fileOpts;
+			fileOpts.suggestedName=synth.currentPatch.name+".dlsp";
+			window.showSaveFilePicker(fileOpts).then(async function(res){
+				synth.currentPatch.fileHandler = res;
+				let fileWriter = await synth.currentPatch.fileHandler.createWritable();
+				fileWriter.write(DLSP.create(synth.currentPatch));
+				fileWriter.close();
+			});
+		});
+		contextMenu.appendChild(saveAsItem);
+
+		let renameItem = document.createElement("div");
+		renameItem.innerText="Rename";
+		renameItem.className="context-item";
+		renameItem.addEventListener("click",function(){
+			let potRename = prompt("Rename synth patch");
+			if(potRename && potRename!==""){
+				synth.currentPatch.name=potRename;
+			}
+		});
+		contextMenu.appendChild(renameItem);
+	}
+
+	contextMenu.style.left=patchbar.file.getBoundingClientRect().x;
+	contextMenu.style.top=patchbar.file.getBoundingClientRect().bottom;
+});
 
 patchbar.patches.addEventListener("click",showHideCtxMenu);
+patchbar.file.addEventListener("click",showHideCtxMenu);
+patchbar.generators.addEventListener("click",showHideCtxMenu);
+patchbar.basics.addEventListener("click",showHideCtxMenu);
 
 //settings
 input.sampleRate.addEventListener("change",function(e){
@@ -496,7 +601,7 @@ button.renameProject.addEventListener("click",function(){
 
 if(window.launchQueue){
 	window.launchQueue.setConsumer(function(data){
-		fileHandler=data.files[0];
+		dlpFileHandler=data.files[0];
 		data.files[0].getFile().then(openFile);
 	});
 }
@@ -603,3 +708,5 @@ export function getPatchbarItemById(id){
 export function changeFile(){
 	changed=true;
 }
+
+export var modularSynth = synth;
