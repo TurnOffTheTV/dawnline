@@ -3,4 +3,4 @@ jobs:
   update-website:
     runs-on: ubuntu-latest
     steps: 
-      - run: curl POST https://dawnline.turnoffthetv.xyz/update
+      - run: curl -X POST https://dawnline.turnoffthetv.xyz/update
