@@ -1,6 +1,6 @@
 {
     "name": "Debug",
-    "desc": "Menu for debugging",
+    "desc": "Debug Dawnline",
     "author": "TurnOffTheTV",
     "version": "1.0.0",
     "src": "/addons/debug/debug.mjs"

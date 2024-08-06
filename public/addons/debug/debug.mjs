@@ -1,10 +1,10 @@
 export function init(editor){
-    editor.addItemToTopbar(new editor.BarItem("Debug","debug-topbar-menu",
+    editor.addItemToTopbar(new editor.BarItem("debug-topbar-menu","Debug",
         new editor.ContextMenu([
-            new editor.ContextMenuItem("Change File","debug-change-file",function(){editor.changeFile()}),
-            new editor.ContextMenuItem("Log Project Var to Console","debug-log-project",function(){console.log(editor.project)}),
-            new editor.ContextMenuItem("Log Current Patch to Console","debug-log-patch",function(){console.log(editor.modularSynth.currentPatch)})
+            new editor.ContextMenuItem("debug-change-file","Change File",function(){editor.changeFile()}),
+            new editor.ContextMenuItem("debug-log-project","Log Project Var to Console",function(){console.log(editor.project)}),
+            new editor.ContextMenuItem("debug-log-patch","Log Current Patch to Console",function(){console.log(editor.synth.currentPatch)})
         ])
     ));
-    editor.getTopbarItemById("debug-topbar-menu").disabled=true;
+    editor.synth.setDebugMode(true);
 }

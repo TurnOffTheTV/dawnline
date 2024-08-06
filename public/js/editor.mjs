@@ -2,9 +2,11 @@
 //script for editor
 
 //import modules
-import * as DLP from "./dlp.mjs"
-import * as DLSP from "./dlsp.mjs"
-import * as synth from "./synth.mjs"
+export const dlp = await import("./dlp.mjs");
+export const dlsp = await import("./dlsp.mjs");
+export const synth = await import("./synth.mjs");
+
+console.log(dlp);
 
 //get settings
 let settings = JSON.parse(localStorage.getItem("settings"));
@@ -110,9 +112,30 @@ class Channel {
 		this.element = document.createElement("div");
 		this.element.className="channel";
 		this.element.dataset.id=this.id;
+
 		let channelInfoEl = document.createElement("div");
 		channelInfoEl.className="channel-info-panel";
-		channelInfoEl.innerHTML="<h4>"+this.name+"</h4>";
+
+		let channelName = document.createElement("h4");
+		channelName.innerText=this.name;
+		channelName.contentEditable
+		channelName.addEventListener("dblclick",function(){
+			this.contentEditable=true;
+			this.focus();
+			this.addEventListener("blur",function(){
+				this.contentEditable=false;
+				for(let i=0;i<project.channels.length;i++){
+					if(project.channels[i].id==this.parentElement.parentElement.dataset.id){
+						project.channels[i].name=this.innerText;
+						break;
+					}
+				}
+			},{once:true});
+		});
+		channelInfoEl.appendChild(channelName);
+
+		let panSliderContainer = document.createElement("div");
+		panSliderContainer.className="pan-slider-container";
 		this.panSlider = document.createElement("input");
 		this.panSlider.className="pan-slider";
 		this.panSlider.type="range";
@@ -129,23 +152,26 @@ class Channel {
 				e.target.step=0.01;
 			}
 		});
-		channelInfoEl.appendChild(this.panSlider);
+		panSliderContainer.appendChild(this.panSlider);
+		channelInfoEl.appendChild(panSliderContainer);
+
 		let removeButton = document.createElement("div");
 		removeButton.className="channel-delete";
 		removeButton.addEventListener("click",function(){
-			console.log(this.parentElement.parentElement.dataset.id);
-				for(let i=0;i<project.channels.length;i++){
-					if(project.channels[i].id==this.parentElement.parentElement.dataset.id){
-						if(confirm("Do you really want to delete "+project.channels[i].name+"?")){
-							project.channels[i].element.remove();
-							project.channels.splice(i,1);
-						}
+			for(let i=0;i<project.channels.length;i++){
+				if(project.channels[i].id==this.parentElement.parentElement.dataset.id){
+					if(confirm("Do you really want to delete "+project.channels[i].name+"?")){
+						project.channels[i].element.remove();
+						project.channels.splice(i,1);
+					}
 					break;
 				}
 			}
 		});
 		channelInfoEl.appendChild(removeButton);
+
 		this.element.appendChild(channelInfoEl);
+
 		this.waveArea = document.createElement("div");
 		this.waveArea.className="wave-area";
 		this.waveArea.innerText="This channel is empty";
@@ -182,7 +208,7 @@ class SynthPatch {
 
 async function openFile(file){
 	//get info from DLP file
-	let proj = await DLP.parse(file);
+	let proj = await dlp.parse(file);
 	project = proj.proj;
 	document.title=project.name+" - Dawnline";
 
@@ -218,6 +244,9 @@ function setAddonMenu(e){
 		let newItem = document.createElement("div");
 		newItem.innerText=item.menu.items[i].label;
 		newItem.className="context-item";
+		if(item.menu.items[i].disabled){
+			newItem.toggleAttribute("disabled",true);
+		}
 		newItem.addEventListener("click",item.menu.items[i].onclick);
 		newItem.dataset.id=item.menu.items[i].id;
 		contextMenu.appendChild(newItem);
@@ -251,6 +280,49 @@ window.addEventListener("beforeunload",function(e){
 });
 window.addEventListener("copy",function(e){
 	console.log(e);
+});
+
+window.addEventListener("keydown",async function(e){
+	if(e.code==="KeyO" && (e.ctrlKey || e.metaKey)){
+		e.preventDefault();
+		window.showOpenFilePicker(dlp.fileOpts).then(async function(res){
+			res["0"].getFile().then(openFile);
+
+			dlpFileHandler = res["0"];
+		});
+	}
+	if(e.code==="KeyS" && e.ctrlKey){
+		e.preventDefault();
+		if(dlpFileHandler){
+			let fileWriter = await dlpFileHandler.createWritable();
+			fileWriter.write(dlp.create(project));
+			fileWriter.close();
+		}else{
+			let fileOpts = dlp.fileOpts;
+			fileOpts.suggestedName=project.name+".dlp";
+			window.showSaveFilePicker(fileOpts).then(async function(res){
+				dlpFileHandler = res;
+				let fileWriter = await dlpFileHandler.createWritable();
+				fileWriter.write(dlp.create(project));
+				fileWriter.close();
+			});
+		}
+	}
+	if(e.code==="KeyS" && e.shiftKey && (e.ctrlKey || e.metaKey)){
+		e.preventDefault();
+		let fileOpts = dlp.fileOpts;
+		fileOpts.suggestedName=project.name+".dlp";
+		//ask where to save and reset file writer to there
+		window.showSaveFilePicker(fileOpts).then(async function(res){
+			dlpFileHandler = res;
+			let fileWriter = await dlpFileHandler.createWritable();
+			//DEBUG
+			console.log(dlp.create(project));
+			fileWriter.write(dlp.create(project));
+			fileWriter.close();
+			fileWriter = await fileWriter.getWriter();
+		});
+	}
 });
 
 //clear windows when background pressed
@@ -294,16 +366,28 @@ topbar.file.addEventListener("mouseover",function(){
 	newItem.innerText="New";
 	newItem.className="context-item";
 	newItem.addEventListener("click",function(){
-		dlpFileHandler=undefined;
-		changed=false;
-		project={
-			name: "New Project",
-			sampleRate: settings.sampleRate,
-			channels: [],
-			patches: []
-		};
-		if(project.sampleRate!==a.sampleRate){
-			a = new AudioContext({sampleRate:project.sampleRate});
+
+		let confirmed = false;
+
+		if(changed){
+			confirmed=confirm("There are unsaved changes, do you really want to create a new file?");
+		}else{
+			confirmed=true;
+		}
+		if(confirmed){
+			dlpFileHandler=undefined;
+			changed=false;
+			project={
+				name: "New Project",
+				sampleRate: settings.sampleRate,
+				channels: [],
+				patches: []
+			};
+			if(project.sampleRate!==a.sampleRate){
+				a = new AudioContext({sampleRate:project.sampleRate});
+			}
+			channelDeck.innerHTML="";
+			document.title=project.name;
 		}
 	});
 	contextMenu.appendChild(newItem);
@@ -312,7 +396,7 @@ topbar.file.addEventListener("mouseover",function(){
 	openItem.innerText="Open";
 	openItem.className="context-item";
 	openItem.addEventListener("click",function(){
-		window.showOpenFilePicker(DLP.fileOpts).then(async function(res){
+		window.showOpenFilePicker(dlp.fileOpts).then(async function(res){
 			res["0"].getFile().then(openFile);
 
 			dlpFileHandler = res["0"];
@@ -326,15 +410,15 @@ topbar.file.addEventListener("mouseover",function(){
 	saveItem.addEventListener("click",async function(){
 		if(dlpFileHandler){
 			let fileWriter = await dlpFileHandler.createWritable();
-			fileWriter.write(DLP.create(project));
+			fileWriter.write(dlp.create(project));
 			fileWriter.close();
 		}else{
-			let fileOpts = DLP.fileOpts;
+			let fileOpts = dlp.fileOpts;
 			fileOpts.suggestedName=project.name+".dlp";
 			window.showSaveFilePicker(fileOpts).then(async function(res){
 				dlpFileHandler = res;
 				let fileWriter = await dlpFileHandler.createWritable();
-				fileWriter.write(DLP.create(project));
+				fileWriter.write(dlp.create(project));
 				fileWriter.close();
 			});
 		}
@@ -345,15 +429,15 @@ topbar.file.addEventListener("mouseover",function(){
 	saveAsItem.innerText="Save As";
 	saveAsItem.className="context-item";
 	saveAsItem.addEventListener("click",async function(){
-		let fileOpts = DLP.fileOpts;
+		let fileOpts = dlp.fileOpts;
 		fileOpts.suggestedName=project.name+".dlp";
 		//ask where to save and reset file writer to there
 		window.showSaveFilePicker(fileOpts).then(async function(res){
 			dlpFileHandler = res;
 			let fileWriter = await dlpFileHandler.createWritable();
 			//DEBUG
-			console.log(DLP.create(project));
-			fileWriter.write(DLP.create(project));
+			console.log(dlp.create(project));
+			fileWriter.write(dlp.create(project));
 			fileWriter.close();
 			fileWriter = await fileWriter.getWriter();
 		});
@@ -400,6 +484,7 @@ topbar.edit.addEventListener("mouseover",function(){
 		newChannelItem.className="context-item";
 		newChannelItem.addEventListener("click",function(){
 			project.channels.push(new Channel());
+			changed=true;
 		});
 		contextMenu.appendChild(newChannelItem);
 	}
@@ -412,6 +497,7 @@ topbar.edit.addEventListener("mouseover",function(){
 			project.patches.push(new SynthPatch());
 			synth.setCurrentPatch(project.patches[project.patches.length-1]);
 			enableSynthMenus();
+			changed=true;
 		});
 		contextMenu.appendChild(newSynthItem);
 	}
@@ -516,8 +602,8 @@ patchbar.file.addEventListener("mouseover",function(){
 	openItem.innerText="Open";
 	openItem.className="context-item";
 	openItem.addEventListener("click",function(){
-		window.showOpenFilePicker(DLSP.fileOpts).then(async function(res){
-			let patch = await DLSP.parse(await res["0"].getFile());
+		window.showOpenFilePicker(dlsp.fileOpts).then(async function(res){
+			let patch = await dlsp.parse(await res["0"].getFile());
 			project.patches.push(new SynthPatch(patch));
 			synth.setCurrentPatch(project.patches[project.patches.length-1]);
 			synth.currentPatch.fileHandler=res["0"];
@@ -532,15 +618,15 @@ patchbar.file.addEventListener("mouseover",function(){
 		saveItem.addEventListener("click",async function(){
 			if(synth.currentPatch.fileHandler){
 				let fileWriter = await synth.currentPatch.fileHandler.createWritable();
-				fileWriter.write(DLSP.create(synth.currentPatch));
+				fileWriter.write(dlsp.create(synth.currentPatch));
 				fileWriter.close();
 			}else{
-				let fileOpts = DLSP.fileOpts;
+				let fileOpts = dlsp.fileOpts;
 				fileOpts.suggestedName=synth.currentPatch.name+".dlsp";
 				window.showSaveFilePicker(fileOpts).then(async function(res){
 					synth.currentPatch.fileHandler = res;
 					let fileWriter = await synth.currentPatch.fileHandler.createWritable();
-					fileWriter.write(DLSP.create(synth.currentPatch));
+					fileWriter.write(dlsp.create(synth.currentPatch));
 					fileWriter.close();
 				});
 			}
@@ -551,12 +637,12 @@ patchbar.file.addEventListener("mouseover",function(){
 		saveAsItem.innerText="Save As";
 		saveAsItem.className="context-item";
 		saveAsItem.addEventListener("click",function(){
-			let fileOpts = DLSP.fileOpts;
+			let fileOpts = dlsp.fileOpts;
 			fileOpts.suggestedName=synth.currentPatch.name+".dlsp";
 			window.showSaveFilePicker(fileOpts).then(async function(res){
 				synth.currentPatch.fileHandler = res;
 				let fileWriter = await synth.currentPatch.fileHandler.createWritable();
-				fileWriter.write(DLSP.create(synth.currentPatch));
+				fileWriter.write(dlsp.create(synth.currentPatch));
 				fileWriter.close();
 			});
 		});
@@ -612,8 +698,9 @@ export class BarItem {
 	label;
 	id;
 	menu;
-	disabled=false;
-	constructor(label,id,menu){
+	#disabled=false;
+	element = document.createElement("div");
+	constructor(id,label,menu){
 		this.label=label;
 		this.id=id;
 		if(!menu instanceof ContextMenu){
@@ -622,10 +709,21 @@ export class BarItem {
 			this.menu=menu;
 		}
 	}
+
+	get disabled(){
+		return this.#disabled;
+	}
+
+	set disabled(value){
+		this.#disabled=value;
+		this.element.toggleAttribute("disabled",value);
+		return this.#disabled;
+	}
 }
 
 export class ContextMenu {
 	items;
+	#disabled=false;
 	constructor(items){
 		if(!Array.isArray(items)){
 			throw new Error("items is not of type Array");
@@ -643,14 +741,25 @@ export class ContextMenu {
 export class ContextMenuItem {
 	label;
 	id;
-	disabled=false;
-	constructor(label,id,onclick){
+	#disabled=false;
+	element = document.createElement("div");
+	constructor(id,label,onclick){
 		this.label=label;
 		this.id=id;
 		if(typeof onclick!=="function"){
 			throw new Error("onclick is not a function");
 		}
 		this.onclick=onclick;
+	}
+
+	get disabled(){
+		return this.#disabled;
+	}
+
+	set disabled(value){
+		this.#disabled=value;
+		this.element.toggleAttribute("disabled",value);
+		return this.#disabled;
 	}
 
 	onclick(){}
@@ -661,13 +770,12 @@ export function addItemToTopbar(item){
 		throw new Error("item is not of type BarItem");
 	}
 	topbar.items.push(item);
-	let newItem = document.createElement("div");
-	newItem.className="topbar-item";
-	newItem.innerText=item.label;
-	newItem.dataset.id=item.id;
-	newItem.addEventListener("mouseover",setAddonMenu);
-	newItem.addEventListener("click",showHideCtxMenu);
-	topbar.el.appendChild(newItem);
+	item.element.className="topbar-item";
+	item.element.innerText=item.label;
+	item.element.dataset.id=item.id;
+	item.element.addEventListener("mouseover",setAddonMenu);
+	item.element.addEventListener("click",showHideCtxMenu);
+	topbar.el.appendChild(item.element);
 }
 
 export function getTopbarItemById(id){
@@ -689,13 +797,12 @@ export function addItemToPatchbar(item){
 		throw new Error("item is not of type BarItem");
 	}
 	patchbar.items.push(item);
-	let newItem = document.createElement("div");
-	newItem.className="topbar-item";
-	newItem.innerText=item.label;
-	newItem.dataset.id=item.id;
-	newItem.addEventListener("mouseover",setAddonMenu);
-	newItem.addEventListener("click",showHideCtxMenu);
-	patchbar.el.appendChild(newItem);
+	item.element.className="topbar-item";
+	item.element.innerText=item.label;
+	item.element.dataset.id=item.id;
+	item.element.addEventListener("mouseover",setAddonMenu);
+	item.element.addEventListener("click",showHideCtxMenu);
+	patchbar.el.appendChild(item.element);
 }
 
 export function getPatchbarItemById(id){
@@ -708,5 +815,3 @@ export function getPatchbarItemById(id){
 export function changeFile(){
 	changed=true;
 }
-
-export var modularSynth = synth;
