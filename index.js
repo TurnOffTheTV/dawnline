@@ -10,14 +10,16 @@ dawnline.use(express.static(path.join(__dirname,"public"),{setHeaders:function(r
     res.set('Service-Worker-Allowed',"/");
 }}));
 
+//get updates
+dawnline.post("/update",function(req,res){
+    console.log("TODO: get latest from Github");
+    res.sendStatus(200);
+});
+
 //404 handling
 dawnline.get("*",function(req,res){
 	res.status(404).send(fs.readFileSync(__dirname+"/public/404.html").toString());
 });
-
-dawnline.post("update",function(){
-    console.log("TODO: get latest from Github");
-})
 
 //start server
 server.listen(8000,function(){
