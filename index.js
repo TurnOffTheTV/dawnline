@@ -15,6 +15,10 @@ dawnline.get("*",function(req,res){
 	res.status(404).send(fs.readFileSync(__dirname+"/public/404.html").toString());
 });
 
+dawnline.post("update",function(){
+    console.log("TODO: get latest from Github");
+})
+
 //start server
 server.listen(8000,function(){
     console.log('server is running on port', server.address().port);

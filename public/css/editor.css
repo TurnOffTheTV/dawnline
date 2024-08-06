@@ -164,20 +164,30 @@
 }
 
 .channel-info-panel {
-	width: 150px;
+	min-width: 150px;
+	max-width: 150px;
 	height: 100%;
 	text-align: center;
 	background: var(--color-background-secondary);
 	border-right: 1px var(--color-gray) solid;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
 	padding: 0px;
 }
 
+.pan-slider-container {
+	width: 125px;
+	height: 10px;
+	padding: auto;
+	margin: 0px;
+	align-self:center;
+}
+
 .pan-slider {
+	display: block;
 	appearance: none;
 	border-radius: 5px;
+	text-align: center;
 	outline: none;
 	width: 125px;
 	height: 10px;
