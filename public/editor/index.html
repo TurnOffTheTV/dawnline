@@ -5,7 +5,7 @@
 		<link rel="manifest" href="/manifest.json" />
 		<datalist id="pan-marker">
 			<option value="0"></option>
-		  </datalist>
+		</datalist>
 	</head>
 	<body>
 		<div id="topbar" class="h bar">
@@ -33,8 +33,8 @@
 			<div id="patchbar" class="h bar">
 				<div id="patchbar-patches" class="topbar-item">Patches</div>
 				<div id="patchbar-file" class="topbar-item">File</div>
-				<div id="patchbar-generators" class="topbar-item" disabled>Generators</div>
 				<div id="patchbar-basics" class="topbar-item" disabled>Basics</div>
+				<div id="patchbar-generators" class="topbar-item" disabled>Generators</div>
 			</div>
 			<div style="height:100%;width:100%;background:black;">
 				<canvas id="synth-canvas"></canvas>
@@ -57,6 +57,14 @@
 					<input id="input-sample-rate" type="number" min="8000" max="96000" step="1">
 					<label for="input-sample-rate">Default Sample Rate</label>
 				</div>
+				<div class="settings-item">
+					<input id="input-secret-code">
+					<input id="button-send-code" type="button" value="Send">
+					<label for="input-secret-code">Secret Code</label>
+				</div>
+				<div class="settings-item" style="text-align: center;">
+					<input id="button-addon-window" type="button" value="Manage Add-ons">
+				</div>
 			</div>
 		</div>
 		<div id="window-about" class="window" style="display:none;">
@@ -66,6 +74,16 @@
 				<li>TurnOffTheTV</li>
 			</ul>
 			<p>Dawnline is open-source on <a href="https://github.com/TurnOffTheTV/dawnline" target="_blank">GitHub</a>!</p>
+		</div>
+		<div id="window-addons" class="window" style="display:none;">
+			<h1>Add-ons</h1>
+			<div id="addon-list" class="v bar" style="border:1px var(--color-gray) solid;background:var(--color-background-secondary);">
+				<div class="settings-item">
+					<span>Debug</span><span>1.0.0</span><span>Debug Dawnline</span><span>TurnOffTheTV</span>
+				</div>
+			</div>
+			<p><input id="input-addon-url" type="url">&Tab;<input id="button-install-addon" type="button" value="Install Add-on"></p>
+			<p style="display: none;">Reload for changes to take effect</p>
 		</div>
 		<div id="context-menu" style="display:none;"></div>
 		<script src="/js/env.mjs" type="module"></script>

@@ -243,6 +243,24 @@
 	
 }
 
+.addon-item {
+	height: 45px;
+	line-height: 45px;
+	padding: 5px;
+	display: flex;
+	vertical-align: middle;
+}
+
+.addon-item span {
+	padding: 0px 2.5px;
+	flex: auto 1 1;
+}
+
+.addon-item input {
+	margin: auto;
+	height: 25px;
+}
+
 .context-item {
 	height:25px;
 	line-height: 25px;
