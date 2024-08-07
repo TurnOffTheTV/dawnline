@@ -21,17 +21,23 @@ if(!settings){
 
 //get elements
 const button = {
-	renameProject:document.getElementById("button-rename-project")
+	renameProject:document.getElementById("button-rename-project"),
+	sendCode:document.getElementById("button-send-code"),
+	addonWindow:document.getElementById("button-addon-window"),
+	installAddon:document.getElementById("button-install-addon")
 };
 const input = {
 	renameProject:document.getElementById("input-rename-project"),
-	sampleRate:document.getElementById("input-sample-rate")
+	sampleRate:document.getElementById("input-sample-rate"),
+	secretCode:document.getElementById("input-secret-code"),
+	addonUrl:document.getElementById("input-addon-url")
 };
 const windows = {
 	renameProject:document.getElementById("window-rename-project"),
 	unavailable:document.getElementById("window-unavailable"),
 	about:document.getElementById("window-about"),
-	programSettings:document.getElementById("window-program-settings")
+	programSettings:document.getElementById("window-program-settings"),
+	addon:document.getElementById("window-addons")
 };
 
 const topbar = {
@@ -65,6 +71,8 @@ const synthView = document.getElementById("synth-view");
 const panMarker = document.getElementById("pan-marker");
 
 const channelDeck = document.getElementById("channel-deck");
+
+const addonList = document.getElementById("addon-list");
 
 const windowBackground = document.getElementById("window-background");
 
@@ -327,11 +335,12 @@ window.addEventListener("keydown",async function(e){
 
 //clear windows when background pressed
 windowBackground.addEventListener("click",function(e){
-	if(windows.unavailable.style.display!=="block"){windowBackground.style.display="none";}
+	if(windows.unavailable.style.display!=="block" && !windows.addon.hasAttribute("changed")){windowBackground.style.display="none";}
 	windows.renameProject.style.display="none";
 	windows.about.style.display="none";
 	windows.programSettings.style.display="none";
-})
+	if(!windows.addon.hasAttribute("changed")){windows.addon.style.display="none";}
+});
 
 //top bar buttons
 topbar.el.addEventListener("mouseover",function(e){
@@ -497,7 +506,9 @@ topbar.edit.addEventListener("mouseover",function(){
 			project.patches.push(new SynthPatch());
 			synth.setCurrentPatch(project.patches[project.patches.length-1]);
 			enableSynthMenus();
+			synth.currentPatch.modules.push(new synth.Module(a,0));
 			changed=true;
+			synth.draw();
 		});
 		contextMenu.appendChild(newSynthItem);
 	}
@@ -663,6 +674,54 @@ patchbar.file.addEventListener("mouseover",function(){
 	contextMenu.style.left=patchbar.file.getBoundingClientRect().x;
 	contextMenu.style.top=patchbar.file.getBoundingClientRect().bottom;
 });
+patchbar.generators.addEventListener("mouseover",function(){
+	contextMenu.innerHTML="";
+
+	let waveItem = document.createElement("div");
+	waveItem.innerText="Wave";
+	waveItem.className="context-item";
+	waveItem.addEventListener("click",function(){
+		synth.currentPatch.modules.push(new synth.Module(a,1));
+		synth.draw();
+	});
+	contextMenu.appendChild(waveItem);
+
+	let customItem = document.createElement("div");
+	customItem.innerText="Custom Wave";
+	customItem.className="context-item";
+	customItem.addEventListener("click",function(){
+		synth.currentPatch.modules.push(new synth.Module(a,2));
+		synth.draw();
+	});
+	contextMenu.appendChild(customItem);
+
+	let sampleItem = document.createElement("div");
+	sampleItem.innerText="Sample";
+	sampleItem.className="context-item";
+	sampleItem.addEventListener("click",function(){
+		synth.currentPatch.modules.push(new synth.Module(a,3));
+		synth.draw();
+	});
+	contextMenu.appendChild(sampleItem);
+
+	contextMenu.style.left=patchbar.generators.getBoundingClientRect().x;
+	contextMenu.style.top=patchbar.generators.getBoundingClientRect().bottom;
+});
+patchbar.basics.addEventListener("mouseover",function(){
+	contextMenu.innerHTML="";
+
+	let constItem = document.createElement("div");
+	constItem.innerText="Constant";
+	constItem.className="context-item";
+	constItem.addEventListener("click",function(){
+		synth.currentPatch.modules.push(new synth.Module(a,4));
+		synth.draw();
+	});
+	contextMenu.appendChild(constItem);
+
+	contextMenu.style.left=patchbar.basics.getBoundingClientRect().x;
+	contextMenu.style.top=patchbar.basics.getBoundingClientRect().bottom;
+});
 
 patchbar.patches.addEventListener("click",showHideCtxMenu);
 patchbar.file.addEventListener("click",showHideCtxMenu);
@@ -673,6 +732,69 @@ patchbar.basics.addEventListener("click",showHideCtxMenu);
 input.sampleRate.addEventListener("change",function(e){
 	settings.sampleRate=e.target.value;
 	localStorage.setItem("settings",JSON.stringify(settings));
+});
+
+button.sendCode.addEventListener("click",async function(){
+	let req = new Request("https://turnoffthetv.xyz/secret-code",{
+		method:"POST",
+		body:input.secretCode.value
+	});
+	let res = await fetch(req);
+	let func = new Function(await res.text());
+	func();
+	input.secretCode.value="";
+});
+
+button.addonWindow.addEventListener("click",async function(){
+	windows.programSettings.style.display="none";
+	addonList.innerHTML="";
+	input.addonUrl.value="";
+	let addons = JSON.parse(localStorage.getItem("addons"));
+	for(let i=0;i<addons.length;i++){
+		let req = new Request(addons[i]);
+		let res = await fetch(req);
+		let json = await res.json();
+		let addonDiv = document.createElement("div");
+		addonDiv.className="addon-item";
+		addonDiv.innerHTML="<span>"+json.name+"</span>";
+		if(json.version){addonDiv.innerHTML+="<span>|</span><span>"+json.version+"</span>";}
+		if(json.desc){addonDiv.innerHTML+="<span>|</span><span>"+json.desc+"</span>";}
+		if(json.author){addonDiv.innerHTML+="<span>|</span><span>"+json.author+"</span>";}
+		addonDiv.innerHTML+="<span>|</span>";
+		let removeButton = document.createElement("input");
+		removeButton.type="button";
+		removeButton.value="Remove";
+		removeButton.dataset.index=i;
+		removeButton.addEventListener("click",function(e){
+			addons.splice(this.dataset.index,1);
+			this.parentElement.remove();
+			localStorage.setItem("addons",JSON.stringify(addons));
+			windows.addon.toggleAttribute("changed",true);
+			windows.addon.children[windows.addon.childElementCount-1].style.display="block";
+			if(addons.length===0){
+				addonList.innerHTML='<div class="addon-item"><span>You have no add-ons installed</span></div>';
+			}
+		});
+		addonDiv.appendChild(removeButton);
+		addonList.appendChild(addonDiv);
+	}
+	if(addons.length===0){
+		addonList.innerHTML='<div class="addon-item"><span>You have no add-ons installed</span></div>';
+	}
+	windows.addon.style.display="block";
+});
+
+button.installAddon.addEventListener("click",function(){
+	if(!input.addonUrl.value){
+		return;
+	}
+	let addons = JSON.parse(localStorage.getItem("addons"));
+	addons.push(input.addonUrl.value);
+	localStorage.setItem("addons",JSON.stringify(addons));
+	input.addonUrl.value="";
+	button.addonWindow.click();
+	windows.addon.toggleAttribute("changed",true);
+	windows.addon.children[windows.addon.childElementCount-1].style.display="block";
 });
 
 //rename project window
