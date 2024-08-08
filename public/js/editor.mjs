@@ -676,48 +676,49 @@ patchbar.file.addEventListener("mouseover",function(){
 });
 patchbar.generators.addEventListener("mouseover",function(){
 	contextMenu.innerHTML="";
+	if(!patchbar.generators.hasAttribute("disabled")){
+		let waveItem = document.createElement("div");
+		waveItem.innerText="Wave";
+		waveItem.className="context-item";
+		waveItem.addEventListener("click",function(){
+			synth.currentPatch.modules.push(new synth.Module(a,1));
+			synth.draw();
+		});
+		contextMenu.appendChild(waveItem);
 
-	let waveItem = document.createElement("div");
-	waveItem.innerText="Wave";
-	waveItem.className="context-item";
-	waveItem.addEventListener("click",function(){
-		synth.currentPatch.modules.push(new synth.Module(a,1));
-		synth.draw();
-	});
-	contextMenu.appendChild(waveItem);
+		let customItem = document.createElement("div");
+		customItem.innerText="Custom Wave";
+		customItem.className="context-item";
+		customItem.addEventListener("click",function(){
+			synth.currentPatch.modules.push(new synth.Module(a,2));
+			synth.draw();
+		});
+		contextMenu.appendChild(customItem);
 
-	let customItem = document.createElement("div");
-	customItem.innerText="Custom Wave";
-	customItem.className="context-item";
-	customItem.addEventListener("click",function(){
-		synth.currentPatch.modules.push(new synth.Module(a,2));
-		synth.draw();
-	});
-	contextMenu.appendChild(customItem);
-
-	let sampleItem = document.createElement("div");
-	sampleItem.innerText="Sample";
-	sampleItem.className="context-item";
-	sampleItem.addEventListener("click",function(){
-		synth.currentPatch.modules.push(new synth.Module(a,3));
-		synth.draw();
-	});
-	contextMenu.appendChild(sampleItem);
-
+		let sampleItem = document.createElement("div");
+		sampleItem.innerText="Sample";
+		sampleItem.className="context-item";
+		sampleItem.addEventListener("click",function(){
+			synth.currentPatch.modules.push(new synth.Module(a,3));
+			synth.draw();
+		});
+		contextMenu.appendChild(sampleItem);
+	}
 	contextMenu.style.left=patchbar.generators.getBoundingClientRect().x;
 	contextMenu.style.top=patchbar.generators.getBoundingClientRect().bottom;
 });
 patchbar.basics.addEventListener("mouseover",function(){
 	contextMenu.innerHTML="";
-
-	let constItem = document.createElement("div");
-	constItem.innerText="Constant";
-	constItem.className="context-item";
-	constItem.addEventListener("click",function(){
-		synth.currentPatch.modules.push(new synth.Module(a,4));
-		synth.draw();
-	});
-	contextMenu.appendChild(constItem);
+	if(!patchbar.basics.hasAttribute("disabled")){
+		let constItem = document.createElement("div");
+		constItem.innerText="Constant";
+		constItem.className="context-item";
+		constItem.addEventListener("click",function(){
+			synth.currentPatch.modules.push(new synth.Module(a,4));
+			synth.draw();
+		});
+		contextMenu.appendChild(constItem);
+	}
 
 	contextMenu.style.left=patchbar.basics.getBoundingClientRect().x;
 	contextMenu.style.top=patchbar.basics.getBoundingClientRect().bottom;

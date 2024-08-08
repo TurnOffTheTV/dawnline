@@ -4,6 +4,8 @@ var width;
 var height;
 var cx = 0;
 var cy = 0;
+var mouseX = 0;
+var mouseY = 0;
 var cs = 1;
 var loaded = false;
 
@@ -27,26 +29,34 @@ synthCanvas.addEventListener("wheel",function(e){
 
 synthCanvas.addEventListener("mousemove",function(e){
 	this.style.cursor="";
+	mouseX=e.offsetX;
+	mouseY=e.offsetY;
 	for(let i=0;i<currentPatch.modules.length;i++){
-		currentPatch.modules[i].hover(e.offsetX,e.offsetY);
-		currentPatch.modules[i].updateCursor(e.offsetX,e.offsetY);
+		currentPatch.modules[i].hover();
+		currentPatch.modules[i].updateCursor();
 	}
 });
 
 synthCanvas.addEventListener("mousedown",function(e){
 	this.style.cursor="";
+	mouseX=e.offsetX;
+	mouseY=e.offsetY;
 	for(let i=0;i<currentPatch.modules.length;i++){
-		currentPatch.modules[i].click(e.offsetX,e.offsetY);
-		currentPatch.modules[i].updateCursor(e.offsetX,e.offsetY);
+		currentPatch.modules[i].click();
+		currentPatch.modules[i].updateCursor();
 	}
 });
 
 synthCanvas.addEventListener("mouseup",function(e){
 	this.style.cursor="";
-	selectedModule=undefined;
+	mouseX=e.offsetX;
+	mouseY=e.offsetY;
 	for(let i=0;i<currentPatch.modules.length;i++){
-		currentPatch.modules[i].updateCursor(e.offsetX,e.offsetY);
+		currentPatch.modules[i].unclick();
+		currentPatch.modules[i].updateCursor();
 	}
+	selectedModule=undefined;
+	draw();
 });
 
 setSize();
@@ -58,8 +68,12 @@ export class Module {
 	context;
 	x=0;
 	y=0;
+	ins=[];
+	outs=[];
 	constructor(context,type){
 		this.context=context;
+		this.x=(-cx/50)*50;
+		this.y=(-cy/50)*50;
 		while(true){
 			this.id=10000+Math.floor(Math.random()*90000);
 			for(var i=0;i<currentPatch.modules.length;i++){
@@ -74,28 +88,40 @@ export class Module {
 			case 0:
 				//mono output
 				this.node=this.context.destination;
+				this.ins=[new ConnectionPoint(this,0,25,false,true)];
 			break;
 			case 1:
 				//wave generator
 				this.waveType=0;
 				this.frequency=261.626;
 				this.node=new OscillatorNode(this.context,{type:"sine",frequency:this.frequency});
+				this.ins=[new ConnectionPoint(this,0,25)];
+				this.outs=[new ConnectionPoint(this,100,25,true,true)];
 			break;
 			case 4:
 				this.value=0;
+				this.outs=[new ConnectionPoint(this,100,25,true)];
 			break;
 		}
 	}
 
-	hover(mouseX,mouseY){
+	hover(){
 		if(selectedModule===this){
 			this.x=Math.round((mouseX-cx+selectOffsetX)/50)*50;
 			this.y=Math.round((mouseY-cy+selectOffsetY)/50)*50;
+		}
+		for(let i=0;i<this.ins.length;i++){
+			this.ins[i].hover();
+		}
+		for(let i=0;i<this.outs.length;i++){
+			this.outs[i].hover();
+		}
+		if(selectedModule===this){
 			draw();
 		}
 	}
 
-	click(mouseX,mouseY){
+	click(){
 		switch(this.type){
 			case 0:
 				if(mouseX>this.x+cx && mouseY>this.y+cy && mouseX<this.x+cx+50 && mouseY<this.y+cy+50){
@@ -123,9 +149,27 @@ export class Module {
 				}
 			break;
 		}
+		for(let i=0;i<this.ins.length;i++){
+			this.ins[i].click();
+		}
+		for(let i=0;i<this.outs.length;i++){
+			this.outs[i].click();
+		}
 	}
 
-	updateCursor(mouseX,mouseY){
+	unclick(){
+		for(let i=0;i<this.ins.length;i++){
+			this.ins[i].unclick();
+		}
+		for(let i=0;i<this.outs.length;i++){
+			this.outs[i].unclick();
+		}
+		if(selectedModule===this){
+			selectedModule=undefined;
+		}
+	}
+
+	updateCursor(){
 		switch(this.type){
 			case 0:
 				if(mouseX>this.x+cx && mouseY>this.y+cy && mouseX<this.x+cx+50 && mouseY<this.y+cy+50){
@@ -145,6 +189,12 @@ export class Module {
 				}
 			break;
 		}
+		for(let i=0;i<this.ins.length;i++){
+			this.ins[i].updateCursor();
+		}
+		for(let i=0;i<this.outs.length;i++){
+			this.outs[i].updateCursor();
+		}
 		if(selectedModule===this){
 			synthCanvas.style.cursor="grabbing";
 		}
@@ -162,18 +212,12 @@ export class Module {
 				c.textAlign="center";
 				c.textBaseline="middle";
 				c.fillText("Out",this.x+25,this.y+25);
-				c.fillStyle="rgb(0,0,255)";
-				c.fillRect(this.x-5,this.y+22.5,5,5);
 			break;
 			case 1:
 				c.fillStyle="rgb(24,77,38)";
 				c.beginPath();
 				c.roundRect(this.x,this.y,100,100,10);
 				c.fill();
-				c.fillStyle="rgb(255,0,0)";
-				c.fillRect(this.x-5,this.y+22.5,5,5);
-				c.fillStyle="rgb(0,0,255)";
-				c.fillRect(this.x+100,this.y+22.5,5,5);
 			break;
 			case 4:
 				c.fillStyle="rgb(66,43,37)";
@@ -187,8 +231,128 @@ export class Module {
 				c.textAlign="center";
 				c.textBaseline="middle";
 				c.fillText(this.value,this.x+50,this.y+25);
+		}
+		for(let i=0;i<this.ins.length;i++){
+			this.ins[i].draw();
+		}
+		for(let i=0;i<this.outs.length;i++){
+			this.outs[i].draw();
+		}
+	}
+}
+
+class ConnectionPoint {
+	parent;
+	offsetX;
+	offsetY;
+	out;
+	audio;
+	connection;
+	constructor(parent,x,y,out,audio){
+		this.parent=parent;
+		this.offsetX=x;
+		this.offsetY=y;
+		this.out=out;
+		this.audio=audio;
+		this.hover();
+	}
+
+	hover(){
+		this.x=this.parent.x+this.offsetX;
+		this.y=this.parent.y+this.offsetY;
+		if(selectedModule===this){
+			for(var i=0;i<currentPatch.modules.length;i++){
+				for(var j=0;j<currentPatch.modules[i].ins.length;j++){
+					if(this.audio===currentPatch.modules[i].ins[j].audio && mouseX>currentPatch.modules[i].ins[j].x+cx-10 && mouseY>currentPatch.modules[i].ins[j].y+cy-5 && mouseX<currentPatch.modules[i].ins[j].x+cx && mouseY<currentPatch.modules[i].ins[j].y+cy+5){
+						mouseX=currentPatch.modules[i].ins[j].x+cx+-2.5;
+						mouseY=currentPatch.modules[i].ins[j].y+cy;
+					}
+				}
+			}
+			draw();
+		}
+	}
+
+	updateCursor(){
+		if(this.out && mouseX>this.x+cx && mouseY>this.y+cy-5 && mouseX<this.x+cx+10 && mouseY<this.y+cy+5){
+			synthCanvas.style.cursor="crosshair";
+		}
+		if(this.connection && !this.out && mouseX>this.x+cx-10 && mouseY>this.y+cy-5 && mouseX<this.x+cx && mouseY<this.y+cy+5){
+			synthCanvas.style.cursor="crosshair";
+		}
+		if(selectedModule===this){
+			synthCanvas.style.cursor="crosshair";
+		}
+	}
+
+	click(){
+		if(this.out && mouseX>this.x+cx && mouseY>this.y+cy-5 && mouseX<this.x+cx+10 && mouseY<this.y+cy+5){
+			selectedModule=this;
+		}
+		if(this.connection && !this.out && mouseX>this.x+cx-10 && mouseY>this.y+cy-5 && mouseX<this.x+cx && mouseY<this.y+cy+5){
+			selectedModule=this.connection;
+			this.connection.connection=undefined;
+			this.connection=undefined;
+		}
+	}
+
+	unclick(){
+		if(selectedModule===this){
+			for(var i=0;i<currentPatch.modules.length;i++){
+				for(var j=0;j<currentPatch.modules[i].ins.length;j++){
+					if(this.audio===currentPatch.modules[i].ins[j].audio && mouseX>currentPatch.modules[i].ins[j].x+cx-10 && mouseY>currentPatch.modules[i].ins[j].y+cy-5 && mouseX<currentPatch.modules[i].ins[j].x+cx && mouseY<currentPatch.modules[i].ins[j].y+cy+5){
+						currentPatch.modules[i].ins[j].connection=this;
+						this.connection=currentPatch.modules[i].ins[j];
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	draw(){
+		if(this.out){
+			if(this.audio){
+				c.fillStyle="rgb(0,0,255)";
+			}else{
 				c.fillStyle="rgb(255,0,0)";
-				c.fillRect(this.x+100,this.y+22.5,5,5);
+			}
+			c.fillRect(this.x,this.y-2.5,5,5);
+		}else{
+			if(this.audio){
+				c.fillStyle="rgb(0,0,255)";
+			}else{
+				c.fillStyle="rgb(255,0,0)";
+			}
+			c.fillRect(this.x-5,this.y-2.5,5,5);
+		}
+		if(selectedModule===this){
+			c.lineWidth=5;
+			if(this.audio){
+				c.strokeStyle="rgb(0,0,255)";
+			}else{
+				c.strokeStyle="rgb(255,0,0)";
+			}
+			c.beginPath();
+			if(this.out){
+				c.moveTo(this.x+2.5,this.y);
+			}else{
+				c.moveTo(this.x-2.5,this.y)
+			}
+			c.lineTo(mouseX-cx,mouseY-cy);
+			c.stroke();
+		}
+		if(this.connection && this.out){
+			c.lineWidth=5;
+			if(this.audio){
+				c.strokeStyle="rgb(0,0,255)";
+			}else{
+				c.strokeStyle="rgb(255,0,0)";
+			}
+			c.beginPath();
+			c.moveTo(this.x+2.5,this.y);
+			c.lineTo(this.connection.x-2.5,this.connection.y);
+			c.stroke();
 		}
 	}
 }
@@ -225,7 +389,6 @@ export function unload(){
 	loaded=false;
 }
 
-let rot = 0;
 export function draw(){
 	c.resetTransform();
 	c.clearRect(0,0,width,height);
@@ -251,9 +414,6 @@ export function draw(){
 		c.textAlign="left";
 		c.textBaseline="top";
 		c.fillStyle="white";
-		c.beginPath();
-		c.ellipse(cx,cy,10,10,0,0,Math.PI*2);
-		c.fill();
 		if(currentPatch){
 			c.fillText(currentPatch.name,0,0);
 			c.fillText(currentPatch.modules.length+" modules",0,15);
@@ -262,5 +422,7 @@ export function draw(){
 			c.fillText("0 modules",0,15);
 		}
 		c.fillText(cx+", "+cy,0,30);
+
+		c.fillText(selectedModule,0,45);
 	}
 }
