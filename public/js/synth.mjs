@@ -6,6 +6,8 @@ var cx = 0;
 var cy = 0;
 var mouseX = 0;
 var mouseY = 0;
+var amouseX = 0;
+var amouseY = 0;
 var cs = 1;
 var loaded = false;
 
@@ -31,18 +33,24 @@ synthCanvas.addEventListener("mousemove",function(e){
 	this.style.cursor="";
 	mouseX=e.offsetX;
 	mouseY=e.offsetY;
+	amouseX=e.clientX;
+	amouseY=e.clientY;
 	for(let i=0;i<currentPatch.modules.length;i++){
 		currentPatch.modules[i].hover();
 		currentPatch.modules[i].updateCursor();
 	}
+	draw();
 });
 
 synthCanvas.addEventListener("mousedown",function(e){
 	this.style.cursor="";
 	mouseX=e.offsetX;
 	mouseY=e.offsetY;
+	amouseX=e.clientX;
+	amouseY=e.clientY;
 	for(let i=0;i<currentPatch.modules.length;i++){
-		currentPatch.modules[i].click();
+		if(e.button===0){currentPatch.modules[i].click();}
+		if(e.button===2){currentPatch.modules[i].rclick();}
 		currentPatch.modules[i].updateCursor();
 	}
 });
@@ -51,29 +59,41 @@ synthCanvas.addEventListener("mouseup",function(e){
 	this.style.cursor="";
 	mouseX=e.offsetX;
 	mouseY=e.offsetY;
+	amouseX=e.clientX;
+	amouseY=e.clientY;
 	for(let i=0;i<currentPatch.modules.length;i++){
 		currentPatch.modules[i].unclick();
 		currentPatch.modules[i].updateCursor();
 	}
-	selectedModule=undefined;
+	selectedObject=undefined;
 	draw();
 });
 
 setSize();
+
+class SynthEvent extends Event {
+	constructor(type){
+		super(type);
+		if(type==="connection"){
+			this.value=arguments[1];
+		}
+	}
+}
 
 export class Module {
 	id;
 	type;
 	node;
 	context;
+	contextMenu;
 	x=0;
 	y=0;
 	ins=[];
 	outs=[];
 	constructor(context,type){
 		this.context=context;
-		this.x=(-cx/50)*50;
-		this.y=(-cy/50)*50;
+		this.x=Math.round((width/2-cx)/50)*50;
+		this.y=Math.round((height/2-cy)/50)*50;
 		while(true){
 			this.id=10000+Math.floor(Math.random()*90000);
 			for(var i=0;i<currentPatch.modules.length;i++){
@@ -87,26 +107,55 @@ export class Module {
 		switch(this.type){
 			case 0:
 				//mono output
-				this.node=this.context.destination;
-				this.ins=[new ConnectionPoint(this,0,25,false,true)];
+				this.ins=[new ConnectionPoint(this,0,25,false,true,"Synth Out")];
 			break;
 			case 1:
 				//wave generator
 				this.waveType=0;
 				this.frequency=261.626;
-				this.node=new OscillatorNode(this.context,{type:"sine",frequency:this.frequency});
-				this.ins=[new ConnectionPoint(this,0,25)];
-				this.outs=[new ConnectionPoint(this,100,25,true,true)];
+				this.ins=[new ConnectionPoint(this,0,25,false,false,"Frequency (hz)")];
+				this.ins[0].addEventListener("connection",function(e){
+					this.parent.frequency=e.value;
+					this.parent.recalcNode();
+				})
+				this.outs=[new ConnectionPoint(this,100,25,true,true,"Wave Signal")];
+			break;
+			case 2:
+				//custom wave generator
+				this.waveType=undefined;
+				this.frequency=261.626;
+				this.ins=[new ConnectionPoint(this,0,25,false,false,"Frequency (hz)"),new ConnectionPoint(this,0,75,false,false,"Waveform")];
+				this.ins[0].addEventListener("connection",function(e){
+					this.parent.frequency=e.value;
+					this.parent.recalcNode();
+				});
+				this.ins[1].addEventListener("connection",function(e){
+					this.parent.frequency=e.value;
+					this.parent.recalcNode();
+				});
+				this.outs=[new ConnectionPoint(this,100,25,true,true,"Wave Signal")];
 			break;
 			case 4:
 				this.value=0;
-				this.outs=[new ConnectionPoint(this,100,25,true)];
+				this.outs=[new ConnectionPoint(this,100,25,true,false,"Value")];
+			break;
+		}
+		this.recalcNode();
+	}
+
+	recalcNode(){
+		switch(this.type){
+			case 0:
+				this.node=this.context.destination;
+			break;
+			case 1:
+				this.node=new OscillatorNode(this.context,{type:"sine",frequency:this.frequency});
 			break;
 		}
 	}
 
 	hover(){
-		if(selectedModule===this){
+		if(selectedObject===this){
 			this.x=Math.round((mouseX-cx+selectOffsetX)/50)*50;
 			this.y=Math.round((mouseY-cy+selectOffsetY)/50)*50;
 		}
@@ -116,7 +165,7 @@ export class Module {
 		for(let i=0;i<this.outs.length;i++){
 			this.outs[i].hover();
 		}
-		if(selectedModule===this){
+		if(selectedObject===this){
 			draw();
 		}
 	}
@@ -125,14 +174,14 @@ export class Module {
 		switch(this.type){
 			case 0:
 				if(mouseX>this.x+cx && mouseY>this.y+cy && mouseX<this.x+cx+50 && mouseY<this.y+cy+50){
-					selectedModule=this;
+					selectedObject=this;
 					selectOffsetX=(this.x+cx)-mouseX;
 					selectOffsetY=(this.y+cy)-mouseY;
 				}
 			break;
 			case 1:
 				if(mouseX>this.x+cx && mouseY>this.y+cy && mouseX<this.x+cx+100 && mouseY<this.y+cy+100){
-					selectedModule=this;
+					selectedObject=this;
 					selectOffsetX=(this.x+cx)-mouseX;
 					selectOffsetY=(this.y+cy)-mouseY;
 				}
@@ -143,7 +192,7 @@ export class Module {
 					if(newValue!=null){this.value=newValue}
 					draw();
 				}else if(mouseX>this.x+cx && mouseY>this.y+cy && mouseX<this.x+cx+100 && mouseY<this.y+cy+50){
-					selectedModule=this;
+					selectedObject=this;
 					selectOffsetX=(this.x+cx)-mouseX;
 					selectOffsetY=(this.y+cy)-mouseY;
 				}
@@ -164,9 +213,25 @@ export class Module {
 		for(let i=0;i<this.outs.length;i++){
 			this.outs[i].unclick();
 		}
-		if(selectedModule===this){
-			selectedModule=undefined;
+		if(selectedObject===this){
+			selectedObject=undefined;
 		}
+	}
+
+	rclick(){
+	this.contextMenu.innerHTML="";
+
+	let deleteItem = document.createElement("div");
+	deleteItem.innerText="Open";
+	deleteItem.className="context-item";
+	deleteItem.dataset.id=this.id;
+	deleteItem.addEventListener("click",function(){
+		alert("Delete module "+this.dataset.id);
+	});
+	this.contextMenu.appendChild(deleteItem);
+
+	this.contextMenu.style.left=amouseX;
+	this.contextMenu.style.top=amouseY;
 	}
 
 	updateCursor(){
@@ -195,7 +260,7 @@ export class Module {
 		for(let i=0;i<this.outs.length;i++){
 			this.outs[i].updateCursor();
 		}
-		if(selectedModule===this){
+		if(selectedObject===this){
 			synthCanvas.style.cursor="grabbing";
 		}
 	}
@@ -241,26 +306,30 @@ export class Module {
 	}
 }
 
-class ConnectionPoint {
+class ConnectionPoint extends EventTarget{
 	parent;
 	offsetX;
 	offsetY;
 	out;
 	audio;
 	connection;
-	constructor(parent,x,y,out,audio){
+	label;
+	overPoint=false;
+	constructor(parent,x,y,out,audio,label){
+		super();
 		this.parent=parent;
 		this.offsetX=x;
 		this.offsetY=y;
 		this.out=out;
 		this.audio=audio;
+		this.label=label;
 		this.hover();
 	}
 
 	hover(){
 		this.x=this.parent.x+this.offsetX;
 		this.y=this.parent.y+this.offsetY;
-		if(selectedModule===this){
+		if(selectedObject===this){
 			for(var i=0;i<currentPatch.modules.length;i++){
 				for(var j=0;j<currentPatch.modules[i].ins.length;j++){
 					if(this.audio===currentPatch.modules[i].ins[j].audio && mouseX>currentPatch.modules[i].ins[j].x+cx-10 && mouseY>currentPatch.modules[i].ins[j].y+cy-5 && mouseX<currentPatch.modules[i].ins[j].x+cx && mouseY<currentPatch.modules[i].ins[j].y+cy+5){
@@ -269,40 +338,44 @@ class ConnectionPoint {
 					}
 				}
 			}
-			draw();
 		}
 	}
 
 	updateCursor(){
 		if(this.out && mouseX>this.x+cx && mouseY>this.y+cy-5 && mouseX<this.x+cx+10 && mouseY<this.y+cy+5){
 			synthCanvas.style.cursor="crosshair";
+			this.overPoint=true;
 		}
-		if(this.connection && !this.out && mouseX>this.x+cx-10 && mouseY>this.y+cy-5 && mouseX<this.x+cx && mouseY<this.y+cy+5){
-			synthCanvas.style.cursor="crosshair";
+		if(!this.out && mouseX>this.x+cx-10 && mouseY>this.y+cy-5 && mouseX<this.x+cx && mouseY<this.y+cy+5){
+			this.overPoint=true;
+			if(this.connection){
+				synthCanvas.style.cursor="crosshair";
+			}
 		}
-		if(selectedModule===this){
+		if(selectedObject===this){
 			synthCanvas.style.cursor="crosshair";
 		}
 	}
 
 	click(){
-		if(this.out && mouseX>this.x+cx && mouseY>this.y+cy-5 && mouseX<this.x+cx+10 && mouseY<this.y+cy+5){
-			selectedModule=this;
+		if(!this.connection && this.out && mouseX>this.x+cx && mouseY>this.y+cy-5 && mouseX<this.x+cx+10 && mouseY<this.y+cy+5){
+			selectedObject=this;
 		}
 		if(this.connection && !this.out && mouseX>this.x+cx-10 && mouseY>this.y+cy-5 && mouseX<this.x+cx && mouseY<this.y+cy+5){
-			selectedModule=this.connection;
+			selectedObject=this.connection;
 			this.connection.connection=undefined;
 			this.connection=undefined;
 		}
 	}
 
 	unclick(){
-		if(selectedModule===this){
+		if(selectedObject===this){
 			for(var i=0;i<currentPatch.modules.length;i++){
 				for(var j=0;j<currentPatch.modules[i].ins.length;j++){
 					if(this.audio===currentPatch.modules[i].ins[j].audio && mouseX>currentPatch.modules[i].ins[j].x+cx-10 && mouseY>currentPatch.modules[i].ins[j].y+cy-5 && mouseX<currentPatch.modules[i].ins[j].x+cx && mouseY<currentPatch.modules[i].ins[j].y+cy+5){
 						currentPatch.modules[i].ins[j].connection=this;
 						this.connection=currentPatch.modules[i].ins[j];
+						if(this.parent.type===4){this.connection.dispatchEvent(new SynthEvent("connection"),this.parent.value);}
 						break;
 					}
 				}
@@ -326,7 +399,7 @@ class ConnectionPoint {
 			}
 			c.fillRect(this.x-5,this.y-2.5,5,5);
 		}
-		if(selectedModule===this){
+		if(selectedObject===this){
 			c.lineWidth=5;
 			if(this.audio){
 				c.strokeStyle="rgb(0,0,255)";
@@ -354,12 +427,20 @@ class ConnectionPoint {
 			c.lineTo(this.connection.x-2.5,this.connection.y);
 			c.stroke();
 		}
+		if(this.overPoint){
+			c.font='15px "Fira Sans"';
+			c.fillStyle="white";
+			c.textAlign="center";
+			c.textBaseline="bottom";
+			c.fillText(this.label,mouseX-cx,mouseY-cy-5);
+			this.overPoint=false;
+		}
 	}
 }
 
 export var currentPatch;
 
-var selectedModule;
+var selectedObject;
 
 var selectOffsetX = 0;
 var selectOffsetY = 0;
@@ -376,8 +457,8 @@ export function setCurrentPatch(patch){
 	draw();
 }
 
-export function setSelectedModule(module){
-	selectedModule=module;
+export function setselectedObject(module){
+	selectedObject=module;
 }
 
 export function load(){
@@ -423,6 +504,6 @@ export function draw(){
 		}
 		c.fillText(cx+", "+cy,0,30);
 
-		c.fillText(selectedModule,0,45);
+		c.fillText(selectedObject,0,45);
 	}
 }
