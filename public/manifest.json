@@ -1,6 +1,6 @@
 {
 	"name": "Dawnline",
-	"description": "An online DAW.",
+	"description": "An online DAW",
 	"start_url": "/editor/",
 	"display": "standalone",
 	"categories": ["music","utilities"],
