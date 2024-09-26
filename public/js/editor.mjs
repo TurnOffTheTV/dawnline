@@ -8,6 +8,148 @@ export const synth = await import("./synth.mjs");
 
 console.log(dlp);
 
+//for add-ons
+
+export class BarItem {
+	label;
+	id;
+	menu;
+	#disabled=false;
+	element = document.createElement("div");
+	constructor(id,label,menu){
+		this.label=label;
+		this.id=id;
+		if(!menu instanceof ContextMenu){
+			throw new Error("menu is not of type ContextMenu")
+		}else{
+			this.menu=menu;
+		}
+	}
+
+	get disabled(){
+		return this.#disabled;
+	}
+
+	set disabled(value){
+		this.#disabled=value;
+		this.element.toggleAttribute("disabled",value);
+		return this.#disabled;
+	}
+}
+
+export class ContextMenu {
+	items;
+	#disabled=false;
+	constructor(items){
+		if(!Array.isArray(items)){
+			throw new Error("items is not of type Array");
+		}
+		for(let i=0;i<items.length;i++){
+			if(!items[i] instanceof ContextMenuItem){
+				console.log(typeof items[i]);
+				throw new Error("item "+i+" is not of type ContextMenuItem");
+			}
+		}
+		this.items=items;
+	}
+
+	getItemById(id){
+		let item = this.items.find(function(e){
+			return e.id===id;
+		});
+		return item;
+	}
+}
+
+export class ContextMenuItem {
+	label;
+	id;
+	#disabled=false;
+	#visible=true;
+	element = document.createElement("div");
+	constructor(id,label,onclick){
+		this.label=label;
+		this.id=id;
+		if(typeof onclick!=="function"){
+			throw new Error("onclick is not a function");
+		}
+		this.onclick=onclick;
+	}
+
+	get disabled(){
+		return this.#disabled;
+	}
+
+	get visible(){
+		return this.#visible;
+	}
+
+	set disabled(value){
+		this.#disabled=value;
+		this.element.toggleAttribute("disabled",value);
+		return this.#disabled;
+	}
+
+	set visible(value){
+		this.#visible=value;
+		this.element.style.display= value?"block":"none";
+		return this.#visible;
+	}
+
+	onclick(){}
+}
+
+export function addItemToTopbar(item){
+	if(!item instanceof BarItem){
+		throw new Error("item is not of type BarItem");
+	}
+	topbar.items.push(item);
+	item.element.className="topbar-item";
+	item.element.innerText=item.label;
+	item.element.dataset.id=item.id;
+	item.element.addEventListener("mouseover",setAddonMenu);
+	item.element.addEventListener("click",showHideCtxMenu);
+	topbar.el.appendChild(item.element);
+}
+
+export function getTopbarItemById(id){
+	let item = topbar.items.find(function(e){
+		return e.id===id;
+	});
+	return item;
+}
+
+export function addItemToControlbar(item){
+	if(!item instanceof BarItem){
+		throw new Error("item is not of type ControlbarItem");
+	}
+	controlbar.items.push(item);
+}
+
+export function addItemToPatchbar(item){
+	if(!item instanceof BarItem){
+		throw new Error("item is not of type BarItem");
+	}
+	patchbar.items.push(item);
+	item.element.className="topbar-item";
+	item.element.innerText=item.label;
+	item.element.dataset.id=item.id;
+	item.element.addEventListener("mouseover",setAddonMenu);
+	item.element.addEventListener("click",showHideCtxMenu);
+	patchbar.el.appendChild(item.element);
+}
+
+export function getPatchbarItemById(id){
+	let item = patchbar.items.find(function(e){
+		return e.id===id;
+	});
+	return item;
+}
+
+export function changeFile(){
+	changed=true;
+}
+
 //get settings
 let settings = JSON.parse(localStorage.getItem("settings"));
 
@@ -43,10 +185,7 @@ const windows = {
 const topbar = {
 	items:[],
 	el: document.getElementById("topbar"),
-	logo: document.getElementById("topbar-logo"),
-	file: document.getElementById("topbar-file"),
-	edit: document.getElementById("topbar-edit"),
-	view: document.getElementById("topbar-view")
+	logo: document.getElementById("topbar-logo")
 };
 
 const controlbar = {
@@ -255,6 +394,7 @@ function setAddonMenu(e){
 		if(item.menu.items[i].disabled){
 			newItem.toggleAttribute("disabled",true);
 		}
+		newItem.style.display=item.menu.items[i].visible?"block":"none";
 		newItem.addEventListener("click",item.menu.items[i].onclick);
 		newItem.dataset.id=item.menu.items[i].id;
 		contextMenu.appendChild(newItem);
@@ -369,13 +509,9 @@ topbar.logo.addEventListener("mouseover",function(){
 	contextMenu.style.left=topbar.logo.getBoundingClientRect().x;
 	contextMenu.style.top=topbar.logo.getBoundingClientRect().bottom;
 });
-topbar.file.addEventListener("mouseover",function(){
-	contextMenu.innerHTML="";
-	let newItem = document.createElement("div");
-	newItem.innerText="New";
-	newItem.className="context-item";
-	newItem.addEventListener("click",function(){
 
+const tbFile = new BarItem("d-file","File",new ContextMenu([
+	new ContextMenuItem("d-file-new","New",function(){
 		let confirmed = false;
 
 		if(changed){
@@ -398,25 +534,15 @@ topbar.file.addEventListener("mouseover",function(){
 			channelDeck.innerHTML="";
 			document.title=project.name;
 		}
-	});
-	contextMenu.appendChild(newItem);
-	
-	let openItem = document.createElement("div");
-	openItem.innerText="Open";
-	openItem.className="context-item";
-	openItem.addEventListener("click",function(){
+	}),
+	new ContextMenuItem("d-file-open","Open",function(){
 		window.showOpenFilePicker(dlp.fileOpts).then(async function(res){
 			res["0"].getFile().then(openFile);
 
 			dlpFileHandler = res["0"];
 		});
-	});
-	contextMenu.appendChild(openItem);
-
-	let saveItem = document.createElement("div");
-	saveItem.innerText="Save";
-	saveItem.className="context-item";
-	saveItem.addEventListener("click",async function(){
+	}),
+	new ContextMenuItem("d-file-save","Save",async function(){
 		if(dlpFileHandler){
 			let fileWriter = await dlpFileHandler.createWritable();
 			fileWriter.write(dlp.create(project));
@@ -431,13 +557,8 @@ topbar.file.addEventListener("mouseover",function(){
 				fileWriter.close();
 			});
 		}
-	});
-	contextMenu.appendChild(saveItem);
-
-	let saveAsItem = document.createElement("div");
-	saveAsItem.innerText="Save As";
-	saveAsItem.className="context-item";
-	saveAsItem.addEventListener("click",async function(){
+	}),
+	new ContextMenuItem("d-file-saveas","Save As",async function(){
 		let fileOpts = dlp.fileOpts;
 		fileOpts.suggestedName=project.name+".dlp";
 		//ask where to save and reset file writer to there
@@ -450,114 +571,68 @@ topbar.file.addEventListener("mouseover",function(){
 			fileWriter.close();
 			fileWriter = await fileWriter.getWriter();
 		});
-	});
-	contextMenu.appendChild(saveAsItem);
-
-	let renameItem = document.createElement("div");
-	renameItem.innerText="Rename";
-	renameItem.className="context-item";
-	renameItem.addEventListener("click",function(){
+	}),
+	new ContextMenuItem("d-file-rename","Rename",function(){
 		windowBackground.style.display="block";
 		windows.renameProject.style.display="block";
 		input.renameProject.value=project.name;
 		input.renameProject.placeholder=project.name;
 		input.renameProject.focus();
-	});
-	contextMenu.appendChild(renameItem);
-	contextMenu.style.left=topbar.file.getBoundingClientRect().x;
-	contextMenu.style.top=topbar.file.getBoundingClientRect().bottom;
-});
-topbar.edit.addEventListener("mouseover",function(){
-	contextMenu.innerHTML="";
-	let cutItem = document.createElement("div");
-	cutItem.innerText="Cut";
-	cutItem.className="context-item";
-	cutItem.addEventListener("click",function(){});
-	contextMenu.appendChild(cutItem);
+	})
+]));
+addItemToTopbar(tbFile);
 
-	let copyItem = document.createElement("div");
-	copyItem.innerText="Copy";
-	copyItem.className="context-item";
-	copyItem.addEventListener("click",function(){});
-	contextMenu.appendChild(copyItem);
+const tbEdit = new BarItem("d-edit","Edit",new ContextMenu([
+	new ContextMenuItem("d-edit-cut","Cut",function(){}),
+	new ContextMenuItem("d-edit-copy","Copy",function(){}),
+	new ContextMenuItem("d-edit-paste","Paste",function(){}),
+	new ContextMenuItem("d-edit-newchannel","New Channel",function(){
+		project.channels.push(new Channel());
+		changed=true;
+	}),
+	new ContextMenuItem("d-edit-newpatch","New Synth Patch",function(){
+		project.patches.push(new SynthPatch());
+		synth.setCurrentPatch(project.patches[project.patches.length-1]);
+		enableSynthMenus();
+		synth.currentPatch.modules.push(new synth.Module(a,0));
+		changed=true;
+		synth.draw();
+	})
+]));
 
-	let pasteItem = document.createElement("div");
-	pasteItem.innerText="Paste";
-	pasteItem.className="context-item";
-	pasteItem.addEventListener("click",function(){});
-	contextMenu.appendChild(pasteItem);
+tbEdit.menu.getItemById("d-edit-newpatch").visible=false;
 
-	if(channelView.style.display==="block"){
-		let newChannelItem = document.createElement("div");
-		newChannelItem.innerText="New Channel";
-		newChannelItem.className="context-item";
-		newChannelItem.addEventListener("click",function(){
-			project.channels.push(new Channel());
-			changed=true;
-		});
-		contextMenu.appendChild(newChannelItem);
-	}
+addItemToTopbar(tbEdit);
 
-	if(synthView.style.display==="block"){
-		let newSynthItem = document.createElement("div");
-		newSynthItem.innerText="New Synth Patch";
-		newSynthItem.className="context-item";
-		newSynthItem.addEventListener("click",function(){
-			project.patches.push(new SynthPatch());
-			synth.setCurrentPatch(project.patches[project.patches.length-1]);
-			enableSynthMenus();
-			synth.currentPatch.modules.push(new synth.Module(a,0));
-			changed=true;
-			synth.draw();
-		});
-		contextMenu.appendChild(newSynthItem);
-	}
-
-	contextMenu.style.left=topbar.edit.getBoundingClientRect().x;
-	contextMenu.style.top=topbar.edit.getBoundingClientRect().bottom;
-});
-topbar.view.addEventListener("mouseover",function(){
-	contextMenu.innerHTML="";
-	let settingsItem = document.createElement("div");
-	settingsItem.innerText="Settings";
-	settingsItem.className="context-item";
-	settingsItem.addEventListener("click",function(){
+const tbView = new BarItem("d-view","View",new ContextMenu([
+	new ContextMenuItem("d-view-settings","Settings",function(){
 		windowBackground.style.display="block";
 		windows.programSettings.style.display="block";
-	});
-	contextMenu.appendChild(settingsItem);
-
-	if(channelView.style.display!=="block"){
-		let channelItem = document.createElement("div");
-		channelItem.innerText="Channel View";
-		channelItem.className="context-item";
-		channelItem.addEventListener("click",function(){
-			channelView.style.display="block";
-			synthView.style.display="none";
-			synth.unload();
-		});
-		contextMenu.appendChild(channelItem);
-	}
-	if(synthView.style.display!=="block"){
-		let synthItem = document.createElement("div");
-		synthItem.innerText="Synth View";
-		synthItem.className="context-item";
-		synthItem.addEventListener("click",function(){
-			synthView.style.display="block";
-			channelView.style.display="none";
-			synth.load();
-		});
-		contextMenu.appendChild(synthItem);
-	}
-
-	contextMenu.style.left=topbar.view.getBoundingClientRect().x;
-	contextMenu.style.top=topbar.view.getBoundingClientRect().bottom;
-});
+	}),
+	new ContextMenuItem("d-view-channelview","Channel View",function(){
+		channelView.style.display="block";
+		synthView.style.display="none";
+		tbView.menu.getItemById("d-view-channelview").visible=false;
+		tbView.menu.getItemById("d-view-synthview").visible=true;
+		tbEdit.menu.getItemById("d-edit-newpatch").visible=false;
+		tbEdit.menu.getItemById("d-edit-newchannel").visible=true;
+		synth.unload();
+	}),
+	new ContextMenuItem("d-view-synthview","Synth View",function(){
+		synthView.style.display="block";
+		channelView.style.display="none";
+		tbView.menu.getItemById("d-view-channelview").visible=true;
+		tbView.menu.getItemById("d-view-synthview").visible=false;
+		tbEdit.menu.getItemById("d-edit-newpatch").visible=true;
+		tbEdit.menu.getItemById("d-edit-newchannel").visible=false;
+		synth.load();
+	})
+]));
+tbView.menu.getItemById("d-view-channelview").visible=false;
+console.log(tbView.menu.getItemById("d-view-channelview").element);
+addItemToTopbar(tbView);
 
 topbar.logo.addEventListener("click",showHideCtxMenu);
-topbar.file.addEventListener("click",showHideCtxMenu);
-topbar.edit.addEventListener("click",showHideCtxMenu);
-topbar.view.addEventListener("click",showHideCtxMenu);
 
 //control bar buttons
 controlbar.play.addEventListener("click",function(){
@@ -569,7 +644,7 @@ controlbar.pause.addEventListener("click",function(){
 	controlbar.play.style.display="block";
 });
 
-//module bar buttons
+//patch bar buttons
 
 patchbar.el.addEventListener("mouseover",function(e){
 	if(e.target===patchbar.el){
@@ -813,128 +888,4 @@ if(window.launchQueue){
 		dlpFileHandler=data.files[0];
 		data.files[0].getFile().then(openFile);
 	});
-}
-
-//for add-ons
-
-export class BarItem {
-	label;
-	id;
-	menu;
-	#disabled=false;
-	element = document.createElement("div");
-	constructor(id,label,menu){
-		this.label=label;
-		this.id=id;
-		if(!menu instanceof ContextMenu){
-			throw new Error("menu is not of type ContextMenu")
-		}else{
-			this.menu=menu;
-		}
-	}
-
-	get disabled(){
-		return this.#disabled;
-	}
-
-	set disabled(value){
-		this.#disabled=value;
-		this.element.toggleAttribute("disabled",value);
-		return this.#disabled;
-	}
-}
-
-export class ContextMenu {
-	items;
-	#disabled=false;
-	constructor(items){
-		if(!Array.isArray(items)){
-			throw new Error("items is not of type Array");
-		}
-		for(let i=0;i<items.length;i++){
-			if(!items[i] instanceof ContextMenuItem){
-				console.log(typeof items[i]);
-				throw new Error("item "+i+" is not of type ContextMenuItem");
-			}
-		}
-		this.items=items;
-	}
-}
-
-export class ContextMenuItem {
-	label;
-	id;
-	#disabled=false;
-	element = document.createElement("div");
-	constructor(id,label,onclick){
-		this.label=label;
-		this.id=id;
-		if(typeof onclick!=="function"){
-			throw new Error("onclick is not a function");
-		}
-		this.onclick=onclick;
-	}
-
-	get disabled(){
-		return this.#disabled;
-	}
-
-	set disabled(value){
-		this.#disabled=value;
-		this.element.toggleAttribute("disabled",value);
-		return this.#disabled;
-	}
-
-	onclick(){}
-}
-
-export function addItemToTopbar(item){
-	if(!item instanceof BarItem){
-		throw new Error("item is not of type BarItem");
-	}
-	topbar.items.push(item);
-	item.element.className="topbar-item";
-	item.element.innerText=item.label;
-	item.element.dataset.id=item.id;
-	item.element.addEventListener("mouseover",setAddonMenu);
-	item.element.addEventListener("click",showHideCtxMenu);
-	topbar.el.appendChild(item.element);
-}
-
-export function getTopbarItemById(id){
-	let item = topbar.items.find(function(e){
-		return e.id===id;
-	});
-	return item;
-}
-
-export function addItemToControlbar(item){
-	if(!item instanceof BarItem){
-		throw new Error("item is not of type ControlbarItem");
-	}
-	controlbar.items.push(item);
-}
-
-export function addItemToPatchbar(item){
-	if(!item instanceof BarItem){
-		throw new Error("item is not of type BarItem");
-	}
-	patchbar.items.push(item);
-	item.element.className="topbar-item";
-	item.element.innerText=item.label;
-	item.element.dataset.id=item.id;
-	item.element.addEventListener("mouseover",setAddonMenu);
-	item.element.addEventListener("click",showHideCtxMenu);
-	patchbar.el.appendChild(item.element);
-}
-
-export function getPatchbarItemById(id){
-	let item = patchbar.items.find(function(e){
-		return e.id===id;
-	});
-	return item;
-}
-
-export function changeFile(){
-	changed=true;
 }
